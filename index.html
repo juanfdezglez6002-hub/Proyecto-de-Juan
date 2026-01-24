@@ -6,7 +6,7 @@
     <title>Apex Racing Hub | Fan Experience</title>
     <style>
         :root {
-            --accent-color: #d60036; /* Rojo deportivo alternativo */
+            --accent-color: #d60036;
             --secondary-color: #00d2ff;
             --dark-bg: #0f1115;
             --card-bg: rgba(26, 28, 35, 0.9);
@@ -37,11 +37,8 @@
         }
 
         header .logo { 
-            font-weight: 800; 
-            font-size: 1.5rem; 
-            letter-spacing: -1px;
-            color: var(--accent-color);
-            text-transform: uppercase;
+            font-weight: 800; font-size: 1.5rem; letter-spacing: -1px;
+            color: var(--accent-color); text-transform: uppercase;
         }
 
         nav button {
@@ -57,54 +54,43 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* HERO */
         .hero-banner {
             background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
                         url('https://images.pexels.com/photos/12795/pexels-photo-12795.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
-            background-size: cover;
-            background-position: center;
-            padding: 4rem 2rem;
-            border-radius: 20px;
-            text-align: center;
-            margin-bottom: 2rem;
-            border: 1px solid var(--glass-border);
+            background-size: cover; background-position: center;
+            padding: 4rem 2rem; border-radius: 20px; text-align: center;
+            margin-bottom: 2rem; border: 1px solid var(--glass-border);
         }
 
         .timer-display { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
         .time-unit { font-size: 2.5rem; font-weight: 800; display: block; }
         .time-label { font-size: 0.7rem; color: #888; text-transform: uppercase; }
 
-        /* CARDS */
         .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;
         }
 
         .menu-card {
-            background: var(--card-bg);
-            padding: 2rem;
-            text-align: center;
-            border-radius: 16px;
-            border: 1px solid var(--glass-border);
-            transition: 0.3s;
+            background: var(--card-bg); padding: 2rem; text-align: center;
+            border-radius: 16px; border: 1px solid var(--glass-border); transition: 0.3s; cursor: pointer;
         }
 
         .menu-card:hover { border-color: var(--accent-color); transform: translateY(-5px); }
 
-        /* TABLES */
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; margin-bottom: 2rem; }
         th { text-align: left; color: var(--accent-color); font-size: 0.8rem; padding: 12px; border-bottom: 2px solid var(--glass-border); }
         td { padding: 12px; border-bottom: 1px solid var(--glass-border); }
 
-        footer {
-            margin-top: 4rem;
-            padding: 2rem;
-            text-align: center;
-            font-size: 0.75rem;
-            color: #666;
-            border-top: 1px solid var(--glass-border);
-        }
+        /* Estilos específicos nuevos */
+        .gp-item { cursor: pointer; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 10px; border: 1px solid var(--glass-border); transition: 0.3s; }
+        .gp-item:hover { border-color: var(--accent-color); }
+        .circuit-info { display: none; padding: 15px; background: rgba(0,0,0,0.3); margin-top: 10px; border-radius: 8px; font-size: 0.9rem; border-left: 3px solid var(--accent-color); }
+        
+        .news-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .news-item { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--glass-border); }
+        .news-body { padding: 15px; }
+
+        footer { margin-top: 4rem; padding: 2rem; text-align: center; font-size: 0.75rem; color: #666; border-top: 1px solid var(--glass-border); }
     </style>
 </head>
 <body>
@@ -115,6 +101,7 @@
             <button onclick="showPage('inicio')">Inicio</button>
             <button onclick="showPage('ranking')">Estadísticas</button>
             <button onclick="showPage('calendario')">Calendario</button>
+            <button onclick="showPage('noticias')">Noticias</button>
         </nav>
     </header>
 
@@ -126,32 +113,32 @@
                     <div><span class="time-unit" id="days">00</span><span class="time-label">Días</span></div>
                     <div><span class="time-unit" id="hours">00</span><span class="time-label">Horas</span></div>
                     <div><span class="time-unit" id="mins">00</span><span class="time-label">Mins</span></div>
+                    <div><span class="time-unit" id="segs">00</span><span class="time-label">segs</span></div>
                 </div>
             </div>
-
             <div class="dashboard">
-                <div class="menu-card" onclick="showPage('ranking')">
-                    <h3>RESULTADOS</h3>
-                    <p>Tablas de rendimiento</p>
-                </div>
-                <div class="menu-card" onclick="showPage('calendario')">
-                    <h3>CIRCUITOS</h3>
-                    <p>Guía de la temporada</p>
-                </div>
+                <div class="menu-card" onclick="showPage('ranking')"><h3>RESULTADOS</h3><p>Tablas de rendimiento</p></div>
+                <div class="menu-card" onclick="showPage('noticias')"><h3>NOTICIAS</h3><p>Última hora</p></div>
             </div>
         </section>
 
         <section id="ranking" class="page">
             <h1>Clasificación Provisoria 2026</h1>
             <div class="menu-card" style="text-align: left;">
+                <h3>Pilotos</h3>
                 <table>
-                    <thead>
-                        <tr><th>Pos</th><th>Piloto</th><th>Constructor</th><th>Pts</th></tr>
-                    </thead>
+                    <thead><tr><th>Pos</th><th>Piloto</th><th>Constructor</th><th>Pts</th></tr></thead>
                     <tbody>
                         <tr><td>1</td><td>M. Verstappen</td><td>R. Bull</td><td>0</td></tr>
                         <tr><td>2</td><td>L. Hamilton</td><td>Ferrari</td><td>0</td></tr>
-                        <tr><td>3</td><td>L. Norris</td><td>McLaren</td><td>0</td></tr>
+                    </tbody>
+                </table>
+                <h3>Equipos</h3>
+                <table>
+                    <thead><tr><th>Pos</th><th>Escudería</th><th>Pts</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>Red Bull Racing</td><td>0</td></tr>
+                        <tr><td>2</td><td>Ferrari</td><td>0</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -159,19 +146,43 @@
 
         <section id="calendario" class="page">
             <h1>Calendario de Temporada</h1>
-            <p>Datos informativos sobre las próximas citas del motor.</p>
-            <div class="menu-card">
-                <p>📍 <strong>Melbourne, Australia</strong> - 15 Marzo</p>
+            <div class="gp-item" onclick="toggleCircuit('c1')">
+                📍 <strong>Melbourne, Australia</strong> - 15 Marzo
+                <div id="c1" class="circuit-info">
+                    <strong>Circuito:</strong> Albert Park<br>
+                    <strong>Longitud:</strong> 5.278 km<br>
+                    <strong>Vueltas:</strong> 58<br>
+                    <strong>Detalle:</strong> Circuito semi-urbano conocido por su alta velocidad y muros cercanos.
+                </div>
             </div>
+            <div class="gp-item" onclick="toggleCircuit('c2')">
+                📍 <strong>Barcelona, España</strong> - 10 Mayo
+                <div id="c2" class="circuit-info">
+                    <strong>Circuito:</strong> Barcelona-Catalunya<br>
+                    <strong>Longitud:</strong> 4.657 km<br>
+                    <strong>Vueltas:</strong> 66<br>
+                    <strong>Detalle:</strong> El trazado de referencia técnica para todos los equipos.
+                </div>
+            </div>
+        </section>
+
+        <section id="noticias" class="page">
+            <h1>Últimas Noticias</h1>
+            <div class="news-container">
+                <div class="news-item">
+                    <div class="news-body">
+                        <small style="color:var(--accent-color)">TÉCNICA • 24 ENE</small>
+                        <h3>Nuevos compuestos de neumáticos</h3>
+                        <p>Análisis de los cambios en el reglamento para la temporada 2026.</p>
+                    </div>
+                </div>
+                </div>
         </section>
     </main>
 
     <footer>
         <p>&copy; 2026 Apex Racing Hub. Proyecto realizado por fans para fines informativos.</p>
-        <p style="max-width: 600px; margin: 10px auto;">
-            Aviso: Este sitio web no es oficial y no tiene relación alguna con el grupo de empresas de la Formula 1. 
-            Las marcas comerciales registradas y nombres de terceros se utilizan únicamente de forma descriptiva.
-        </p>
+        <p>Aviso: Este sitio web es independiente y no oficial.</p>
     </footer>
 
     <script>
@@ -181,7 +192,11 @@
             window.scrollTo(0,0);
         }
 
-        // Timer simplificado para demostración
+        function toggleCircuit(id) {
+            const el = document.getElementById(id);
+            el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+        }
+
         const raceDate = new Date("March 15, 2026 06:00:00").getTime();
         setInterval(() => {
             const now = new Date().getTime();
@@ -189,6 +204,7 @@
             document.getElementById("days").innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
             document.getElementById("hours").innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             document.getElementById("mins").innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            document.getElementById("segs").innerText = Math.floor((diff % (1000 * 60)) / 1000);
         }, 1000);
     </script>
 </body>
