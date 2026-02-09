@@ -564,47 +564,35 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    // CONFIGURACIÓN (Rellena con tus datos)
+    // 1. CONFIGURACIÓN DE SUPABASE
     const SUPABASE_URL = 'https://betbuoohuuvvutbuqypb.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJldGJ1b29odXV2dnV0YnVxeXBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2Mjc2MjYsImV4cCI6MjA4NjIwMzYyNn0.lWPCBFlP0ouMJcWE_eufBMWJxCKwEEREhzjmvKECzuU';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // FUNCIÓN: Registro de nuevos fans
+    // 2. LÓGICA DE AUTENTICACIÓN
     async function handleSignUp() {
         const email = document.getElementById('auth-email').value;
         const password = document.getElementById('auth-password').value;
+        if (!email || !password) return alert("Por favor, rellena ambos campos");
 
-        const { data, error } = await _supabase.auth.signUp({
-            email: email,
-            password: password,
-        });
-
-        if (error) alert("Error en el registro: " + error.message);
-        else alert("¡Bienvenido a la parrilla! Revisa tu email o inicia sesión.");
+        const { data, error } = await _supabase.auth.signUp({ email, password });
+        if (error) alert("Error: " + error.message);
+        else alert("¡Registro enviado! Revisa tu email para confirmar tu cuenta antes de entrar.");
     }
 
-    // FUNCIÓN: Inicio de sesión
     async function handleSignIn() {
         const email = document.getElementById('auth-email').value;
         const password = document.getElementById('auth-password').value;
-
-        const { data, error } = await _supabase.auth.signInWithPassword({
-            email: email,
-            password: password,
-        });
-
-        if (error) alert("Fallo de motor (Login): " + error.message);
-        else console.log("Usuario entró:", data.user);
+        const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+        if (error) alert("Fallo de motor: " + error.message);
     }
 
-    // FUNCIÓN: Cerrar sesión
     async function handleSignOut() {
         await _supabase.auth.signOut();
-        alert("Sesión cerrada. ¡Nos vemos en boxes!");
     }
 
-    // OBSERVADOR: Cambia la interfaz según si el usuario está dentro o fuera
     _supabase.auth.onAuthStateChange((event, session) => {
         const loggedOutView = document.getElementById('logged-out-view');
         const loggedInView = document.getElementById('logged-in-view');
@@ -612,26 +600,55 @@
 
         if (session) {
             loggedOutView.style.display = 'none';
-            loggedInView.style.display = 'block';
-            userDisplay.innerText = `Fan: ${session.user.email}`;
+            loggedInView.style.display = 'flex'; // Cambiado a flex para que se vea mejor
+            userDisplay.innerText = `Piloto: ${session.user.email}`;
         } else {
             loggedOutView.style.display = 'block';
             loggedInView.style.display = 'none';
         }
     });
 
-    // --- TUS FUNCIONES EXISTENTES (Mantenlas aquí abajo) ---
+    // 3. NAVEGACIÓN
     function showPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
+        window.scrollTo(0,0);
     }
 
     function toggleInfo(id) {
         const el = document.getElementById(id);
         el.style.display = (el.style.display === 'block') ? 'none' : 'block';
     }
-    
-    // Aquí iría tu código del contador (countdown) que ya tienes...
+
+    // 4. LÓGICA DEL CONTADOR (REPARADA)
+    const eventDate = new Date('March 15, 2026 05:00:00').getTime();
+
+    function updateCountdown() {
+        const now = new Date().getTime();
+        const gap = eventDate - now;
+
+        const second = 1000;
+        const minute = second * 60;
+        const hour = minute * 60;
+        const day = hour * 24;
+
+        const d = Math.floor(gap / day);
+        const h = Math.floor((gap % day) / hour);
+        const m = Math.floor((gap % hour) / minute);
+        const s = Math.floor((gap % minute) / second);
+
+        // Actualizamos el HTML (con validación para que no dé error)
+        if(document.getElementById('days')) {
+            document.getElementById('days').innerText = d < 10 ? '0' + d : d;
+            document.getElementById('hours').innerText = h < 10 ? '0' + h : h;
+            document.getElementById('mins').innerText = m < 10 ? '0' + m : m;
+            document.getElementById('segs').innerText = s < 10 ? '0' + s : s;
+        }
+    }
+
+    // Arrancamos el contador cada segundo
+    setInterval(updateCountdown, 1000);
+    updateCountdown(); // Ejecución inmediata al cargar
 </script>
 </body>
 </html>
