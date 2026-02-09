@@ -137,27 +137,19 @@
             <button onclick="showPage('calendario')">Calendario</button>
             <button onclick="showPage('noticias')">Noticias</button>
         </nav>
-                    <!-- Contenedor de Autenticación -->
-            <div id="auth-container">
-                <h2 id="auth-title">Iniciar Sesión</h2>
-                
-                <input type="email" id="auth-email" placeholder="Tu correo electrónico">
-                <input type="password" id="auth-password" placeholder="Tu contraseña">
-                
-                <div id="auth-buttons">
-                    <button onclick="handleSignIn()">Entrar</button>
-                    <button onclick="handleSignUp()" style="background:#444">Crear Cuenta</button>
-                </div>
-            
-                <p><a href="#" onclick="showResetPassword()">¿Olvidaste tu contraseña?</a></p>
-            </div>
-            
-            <!-- Contenedor de Cambio de Contraseña (Oculto por defecto) -->
-            <div id="reset-container" style="display:none">
-                <h2>Nueva Contraseña</h2>
-                <input type="password" id="new-password" placeholder="Escribe tu nueva clave">
-                <button onclick="updatePassword()">Actualizar Contraseña</button>
-            </div>
+<div id="auth-section">
+    <div id="logged-out-view">
+        <input type="email" id="auth-email" placeholder="Email" style="padding: 5px; border-radius: 4px; border: 1px solid #444; background: #222; color: white;">
+        <input type="password" id="auth-password" placeholder="Contraseña" style="padding: 5px; border-radius: 4px; border: 1px solid #444; background: #222; color: white;">
+        <button onclick="handleSignIn()">Entrar</button>
+        <button onclick="handleSignUp()" style="background:#444">Registrarse</button>
+    </div>
+
+    <div id="logged-in-view" style="display:none">
+        <span id="user-display" style="margin-right: 10px; font-size: 0.8rem; color: var(--secondary-color);"></span>
+        <button onclick="handleSignOut()" style="background: #333">Cerrar Sesión</button>
+    </div>
+</div>
 
     </header>
 
@@ -570,94 +562,76 @@
         <p>Aviso: Este sitio web es independiente y no oficial.</p>
     </footer>
 
-    <script>
-        // 1. Registro de nuevos usuarios
-async function handleSignUp() {
-    const email = document.getElementById('auth-email').value;
-    const password = document.getElementById('auth-password').value;
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+    // CONFIGURACIÓN (Rellena con tus datos)
+    const SUPABASE_URL = 'TU_URL_DE_SUPABASE';
+    const SUPABASE_ANON_KEY = 'TU_KEY_ANONIMA';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // FUNCIÓN: Registro de nuevos fans
+    async function handleSignUp() {
+        const email = document.getElementById('auth-email').value;
+        const password = document.getElementById('auth-password').value;
+
+        const { data, error } = await _supabase.auth.signUp({
+            email: email,
+            password: password,
+        });
+
+        if (error) alert("Error en el registro: " + error.message);
+        else alert("¡Bienvenido a la parrilla! Revisa tu email o inicia sesión.");
+    }
+
+    // FUNCIÓN: Inicio de sesión
+    async function handleSignIn() {
+        const email = document.getElementById('auth-email').value;
+        const password = document.getElementById('auth-password').value;
+
+        const { data, error } = await _supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) alert("Fallo de motor (Login): " + error.message);
+        else console.log("Usuario entró:", data.user);
+    }
+
+    // FUNCIÓN: Cerrar sesión
+    async function handleSignOut() {
+        await _supabase.auth.signOut();
+        alert("Sesión cerrada. ¡Nos vemos en boxes!");
+    }
+
+    // OBSERVADOR: Cambia la interfaz según si el usuario está dentro o fuera
+    _supabase.auth.onAuthStateChange((event, session) => {
+        const loggedOutView = document.getElementById('logged-out-view');
+        const loggedInView = document.getElementById('logged-in-view');
+        const userDisplay = document.getElementById('user-display');
+
+        if (session) {
+            loggedOutView.style.display = 'none';
+            loggedInView.style.display = 'block';
+            userDisplay.innerText = `Fan: ${session.user.email}`;
+        } else {
+            loggedOutView.style.display = 'block';
+            loggedInView.style.display = 'none';
+        }
+    });
+
+    // --- TUS FUNCIONES EXISTENTES (Mantenlas aquí abajo) ---
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+    }
+
+    function toggleInfo(id) {
+        const el = document.getElementById(id);
+        el.style.display = (el.style.display === 'block') ? 'none' : 'block';
+    }
     
-    const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-    });
-
-    if (error) {
-        alert("Error: " + error.message);
-    } else {
-        alert("¡Registro casi listo! Te hemos enviado un email de confirmación.");
-    }
-}
-
-// 2. Inicio de Sesión
-async function handleSignIn() {
-    const email = document.getElementById('auth-email').value;
-    const password = document.getElementById('auth-password').value;
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-    });
-
-    if (error) {
-        alert("Error de acceso: " + error.message);
-    } else {
-        alert("¡Bienvenido de nuevo!");
-        // Aquí llamarías a una función para mostrar el chat y los juegos
-        mostrarContenidoProtegido(); 
-    }
-}
-
-// 3. Olvidé mi contraseña (Paso 1: Enviar email)
-async function showResetPassword() {
-    const email = document.getElementById('auth-email').value;
-    if (!email) return alert("Introduce tu email primero");
-
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.href, // Te devuelve a esta misma página
-    });
-
-    if (error) alert(error.message);
-    else alert("Revisa tu bandeja de entrada para restablecer la clave.");
-}
-
-// 4. Actualizar contraseña (Paso 2: Cuando vuelven del email)
-async function updatePassword() {
-    const newPassword = document.getElementById('new-password').value;
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-
-    if (error) alert(error.message);
-    else {
-        alert("Contraseña actualizada correctamente.");
-        document.getElementById('reset-container').style.display = 'none';
-    }
-}
-
-        
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            window.scrollTo(0,0);
-        }
-
-        function toggleInfo(id) {
-            const el = document.getElementById(id);
-            const isVisible = el.style.display === 'block';
-            
-            // Cierra todos los posibles desplegables de todas las secciones
-            document.querySelectorAll('.circuit-info, .news-body').forEach(info => info.style.display = 'none');
-            
-            el.style.display = isVisible ? 'none' : 'block';
-        }
-
-        const raceDate = new Date("March 6, 2026 02:30:00").getTime();
-        setInterval(() => {
-            const now = new Date().getTime();
-            const diff = raceDate - now;
-            document.getElementById("days").innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
-            document.getElementById("hours").innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            document.getElementById("mins").innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            document.getElementById("segs").innerText = Math.floor((diff % (1000 * 60)) / 1000);
-        }, 1000);
-    </script>
+    // Aquí iría tu código del contador (countdown) que ya tienes...
+</script>
 </body>
 </html>
