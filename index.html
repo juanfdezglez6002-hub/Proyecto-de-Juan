@@ -571,6 +571,68 @@
     </footer>
 
     <script>
+        // 1. Registro de nuevos usuarios
+async function handleSignUp() {
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-password').value;
+    
+    const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        alert("Error: " + error.message);
+    } else {
+        alert("¡Registro casi listo! Te hemos enviado un email de confirmación.");
+    }
+}
+
+// 2. Inicio de Sesión
+async function handleSignIn() {
+    const email = document.getElementById('auth-email').value;
+    const password = document.getElementById('auth-password').value;
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        alert("Error de acceso: " + error.message);
+    } else {
+        alert("¡Bienvenido de nuevo!");
+        // Aquí llamarías a una función para mostrar el chat y los juegos
+        mostrarContenidoProtegido(); 
+    }
+}
+
+// 3. Olvidé mi contraseña (Paso 1: Enviar email)
+async function showResetPassword() {
+    const email = document.getElementById('auth-email').value;
+    if (!email) return alert("Introduce tu email primero");
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.href, // Te devuelve a esta misma página
+    });
+
+    if (error) alert(error.message);
+    else alert("Revisa tu bandeja de entrada para restablecer la clave.");
+}
+
+// 4. Actualizar contraseña (Paso 2: Cuando vuelven del email)
+async function updatePassword() {
+    const newPassword = document.getElementById('new-password').value;
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+    if (error) alert(error.message);
+    else {
+        alert("Contraseña actualizada correctamente.");
+        document.getElementById('reset-container').style.display = 'none';
+    }
+}
+
+        
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(id).classList.add('active');
