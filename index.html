@@ -137,6 +137,28 @@
             <button onclick="showPage('calendario')">Calendario</button>
             <button onclick="showPage('noticias')">Noticias</button>
         </nav>
+                    <!-- Contenedor de Autenticación -->
+            <div id="auth-container">
+                <h2 id="auth-title">Iniciar Sesión</h2>
+                
+                <input type="email" id="auth-email" placeholder="Tu correo electrónico">
+                <input type="password" id="auth-password" placeholder="Tu contraseña">
+                
+                <div id="auth-buttons">
+                    <button onclick="handleSignIn()">Entrar</button>
+                    <button onclick="handleSignUp()" style="background:#444">Crear Cuenta</button>
+                </div>
+            
+                <p><a href="#" onclick="showResetPassword()">¿Olvidaste tu contraseña?</a></p>
+            </div>
+            
+            <!-- Contenedor de Cambio de Contraseña (Oculto por defecto) -->
+            <div id="reset-container" style="display:none">
+                <h2>Nueva Contraseña</h2>
+                <input type="password" id="new-password" placeholder="Escribe tu nueva clave">
+                <button onclick="updatePassword()">Actualizar Contraseña</button>
+            </div>
+
     </header>
 
     <main>
