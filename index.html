@@ -209,6 +209,13 @@
     line-height: 1.8;
     color: #e0e0e0;
 }
+.page {
+        display: none;
+    }
+
+    .page.active {
+        display: block;
+    }
     </style>
 </head>
 <body>
@@ -221,7 +228,9 @@
             <button onclick="showPage('equipos')">Equipos</button>
             <button onclick="showPage('ranking')">Clasificación</button>
             <button onclick="showPage('calendario')">Calendario</button>
+            <button onclick="showPage('juegos')">Juegos</button>
             <button onclick="showPage('noticias')">Noticias</button>
+            
         </nav>
 <div id="auth-section">
     <div id="logged-out-view">
