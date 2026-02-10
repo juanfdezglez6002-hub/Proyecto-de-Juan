@@ -609,7 +609,45 @@
                 </div>
             </div>
         </section>
+<section id="juegos" class="page">
+    <h1>🎮 Minijuegos</h1>
+    <p style="color: #888; margin-bottom: 2rem;">Adivina el tiempo de la Pole. Cierre: 30 min antes de la Qualy.</p>
 
+    <div id="user-stats" style="display: none; background: #111; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--accent-color);">
+        <h4 style="color: var(--accent-color); margin: 0;">Tu última precisión:</h4>
+        <p id="stat-detail" style="font-size: 1.2rem; margin: 10px 0;">Calculando...</p>
+        <div style="background: #333; height: 10px; border-radius: 5px;">
+            <div id="stat-bar" style="background: var(--accent-color); height: 100%; width: 0%; border-radius: 5px; transition: 1s;"></div>
+        </div>
+        <small id="stat-percentile" style="color: #888;"></small>
+    </div>
+
+    <div class="news-item" id="game-container" style="border: 2px solid #333; padding: 20px;">
+        <h3 id="gp-title">GP de Australia 2026</h3>
+        <div style="display: flex; gap: 10px; margin-top: 15px;">
+            <input type="text" id="input-time" placeholder="Ej: 1:16.732" style="flex: 1; padding: 12px; background: #000; color: white; border: 1px solid #444;">
+            <button onclick="enviarTiempo()" id="btn-predecir" style="background: var(--accent-color); color: white; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer;">ENVIAR</button>
+        </div>
+        <p id="game-msg" style="margin-top: 10px; font-size: 0.8rem;"></p>
+    </div>
+
+    <div class="table-container" style="margin-top: 30px;">
+        <h3 style="color: var(--accent-color);">🏆 Top 10 Tiempos más Cercanos</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Pos</th>
+                    <th>Piloto</th>
+                    <th>Tiempo</th>
+                    <th>Dif.</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                <tr><td colspan="4" style="text-align:center;">Cargando ranking...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
 <section id="noticias" class="page">
     <div id="news-list-view">
         <h1 style="margin-bottom: 2rem; border-left: 5px solid var(--accent-color); padding-left: 15px;">
