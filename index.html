@@ -704,6 +704,48 @@
     // Arrancamos el contador cada segundo
     setInterval(updateCountdown, 1000);
     updateCountdown(); // Ejecución inmediata al cargar
+    // Objeto con el contenido de las noticias (Simulando base de datos)
+const newsDatabase = {
+    'n1': {
+        title: "Pirelli 2026: Los neumáticos del futuro",
+        tag: "TÉCNICA",
+        img: "https://images.pexels.com/photos/355325/pexels-photo-355325.jpeg",
+        content: `
+            <p>Pirelli ha anunciado oficialmente los cambios estructurales para la temporada 2026...</p>
+            <p>El desafío principal es el aumento del 30% en la entrega de potencia eléctrica, lo que castiga severamente el neumático trasero en tracción.</p>
+            <img src="https://images.pexels.com/photos/355325/pexels-photo-355325.jpeg" style="width:100%; border-radius:10px; margin: 20px 0;">
+            <p>Los ingenieros han diseñado una nueva carcasa que permite presiones más bajas para ganar grip sin riesgo de explosión.</p>`
+    },
+    'n2': {
+        title: "Test de Baréin: Calendario oficial",
+        tag: "ÚLTIMA HORA",
+        img: "https://images.pexels.com/photos/191538/pexels-photo-191538.jpeg",
+        content: `<p>Los test de pretemporada se celebrarán del 25 al 27 de febrero en el Circuito Internacional de Sakhir...</p>`
+    }
+};
+
+function openArticle(id) {
+    const article = newsDatabase[id];
+    if (article) {
+        document.getElementById('news-list-view').style.display = 'none';
+        const viewer = document.getElementById('article-viewer');
+        const content = document.getElementById('article-content');
+        
+        content.innerHTML = `
+            <span class="news-tag">${article.tag}</span>
+            <h2 style="margin-top:10px;">${article.title}</h2>
+            ${article.content}
+        `;
+        
+        viewer.style.display = 'block';
+        window.scrollTo(0,0);
+    }
+}
+
+function closeArticle() {
+    document.getElementById('article-viewer').style.display = 'none';
+    document.getElementById('news-list-view').style.display = 'block';
+}
 </script>
 </body>
 </html>
