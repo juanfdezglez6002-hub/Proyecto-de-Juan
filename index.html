@@ -837,6 +837,77 @@ function closeArticle() {
     document.getElementById('article-viewer').style.display = 'none';
     document.getElementById('news-list-view').style.display = 'block';
 }
+// Configura aquí la fecha de la clasificación (ejemplo Australia)
+const fechaQualy = new Date('March 14, 2026 06:00:00').getTime(); 
+
+async function enviarTiempo() {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) return alert("Inicia sesión para jugar.");
+
+    // Bloqueo 30 min antes
+    const ahora = new Date().getTime();
+    const limite = fechaQualy - (30 * 60 * 1000);
+    if (ahora > limite) {
+        document.getElementById('btn-predecir').disabled = true;
+        return alert("El tiempo de predicción ha cerrado.");
+    }
+
+    const tiempo = document.getElementById('input-time').value;
+    const { error } = await _supabase.from('predicciones').insert([
+        { user_id: session.user.id, email: session.user.email, predicted_time: tiempo, gp_id: 'aus_2026' }
+    ]);
+
+    if (error) alert("Ya has participado en este GP.");
+    else {
+        alert("¡Tiempo registrado!");
+        cargarRanking();
+    }
+}
+
+async function cargarRanking() {
+    // Obtenemos el Top 10 ordenado por 'score' (diferencia más pequeña)
+    const { data, error } = await _supabase
+        .from('predicciones')
+        .select('*')
+        .not('score', 'is', null)
+        .order('score', { ascending: true })
+        .limit(10);
+
+    if (data) {
+        document.getElementById('leaderboard-body').innerHTML = data.map((d, i) => `
+            <tr>
+                <td>${i+1}</td>
+                <td>${d.email.split('@')[0]}</td>
+                <td>${d.predicted_time}</td>
+                <td>+${d.score}s</td>
+            </tr>
+        `).join('');
+    }
+    
+    mostrarMiProgreso();
+}
+
+async function mostrarMiProgreso() {
+    const { data: { session } } = await _supabase.auth.getSession();
+    if (!session) return;
+
+    // 1. Obtener mi puntuación y el total de participantes
+    const { data: todos } = await _supabase.from('predicciones').select('score').not('score', 'is', null).order('score', { ascending: true });
+    const { data: miDato } = await _supabase.from('predicciones').select('score').eq('user_id', session.user.id).single();
+
+    if (miDato && miDato.score && todos) {
+        const total = todos.length;
+        const miPosicion = todos.findIndex(t => t.score === miDato.score) + 1;
+        
+        // Calcular percentil (Que tan cerca estoy del 100%)
+        const percentil = ((total - miPosicion) / total) * 100;
+        
+        document.getElementById('user-stats').style.display = 'block';
+        document.getElementById('stat-detail').innerText = `Te quedaste a +${miDato.score}s`;
+        document.getElementById('stat-percentile').innerText = `Estás por delante del ${percentil.toFixed(1)}% de los jugadores`;
+        document.getElementById('stat-bar').style.width = `${percentil}%`;
+    }
+}
 </script>
 </body>
 </html>
