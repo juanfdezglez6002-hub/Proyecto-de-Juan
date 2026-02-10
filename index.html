@@ -306,103 +306,75 @@
     </footer>
 
     <script>
-        // LÓGICA DE NAVEGACIÓN
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const targetPage = document.getElementById(pageId);
-            if(targetPage) targetPage.classList.add('active');
-        }
+// 1. CONFIGURACIÓN DE SUPABASE
+    const SUPABASE_URL = 'https://betbuoohuuvvutbuqypb.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJldGJ1b29odXV2dnV0YnVxeXBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2Mjc2MjYsImV4cCI6MjA4NjIwMzYyNn0.lWPCBFlP0ouMJcWE_eufBMWJxCKwEEREhzjmvKECzuU';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // LÓGICA PARA DESPLEGAR INFO (PILOTOS/EQUIPOS/CALENDARIO)
-        function toggleInfo(id) {
-            const el = document.getElementById(id);
-            const isVisible = el.style.display === 'block';
-            document.querySelectorAll('.circuit-info').forEach(info => info.style.display = 'none');
-            el.style.display = isVisible ? 'none' : 'block';
+    // 2. NAVEGACIÓN ENTRE SECCIONES (Menu Principal)
+    function showPage(pageId) {
+        // Ocultamos todas las secciones
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        
+        // Mostramos la que queremos
+        const targetPage = document.getElementById(pageId);
+        if (targetPage) {
+            targetPage.classList.add('active');
+        } else {
+            console.error("No se encontró la página:", pageId);
         }
+        window.scrollTo(0,0);
+    }
 
-        // LÓGICA PARA DESPLEGAR NOTICIAS (ESTILO EDITORIAL)
-        function toggleNews(id) {
-            const el = document.getElementById(id);
-            const isVisible = el.style.display === 'block';
-            document.querySelectorAll('.news-body').forEach(body => body.style.display = 'none');
-            el.style.display = isVisible ? 'none' : 'block';
+    // 3. DESPLEGAR INFORMACIÓN (Pilotos, Circuitos, Noticias)
+    function toggleInfo(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            // Si está oculto o no tiene estilo, lo mostramos
+            if (el.style.display === 'none' || el.style.display === '') {
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        } else {
+            console.warn("El ID '" + id + "' no existe en el HTML.");
         }
+    }
 
-        // TIMER DE CUENTA REGRESIVA
-        const eventDate = new Date('March 15, 2026 05:00:00').getTime();
-        setInterval(() => {
-            const now = new Date().getTime();
-            const diff = eventDate - now;
-            document.getElementById('days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
-            document.getElementById('hours').innerText = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            document.getElementById('mins').innerText = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            document.getElementById('segs').innerText = Math.floor((diff % (1000 * 60)) / 1000);
-        }, 1000);
-            const userDisplay = document.getElementById('user-display');
+    // 4. LÓGICA DE USUARIOS
+    _supabase.auth.onAuthStateChange((event, session) => {
         const loggedOutView = document.getElementById('logged-out-view');
         const loggedInView = document.getElementById('logged-in-view');
+        const userDisplay = document.getElementById('user-display');
 
         if (session) {
-            loggedOutView.style.display = 'none';
-            loggedInView.style.display = 'block';
-            userDisplay.textContent = `Piloto: ${session.user.email}`;
+            if(loggedOutView) loggedOutView.style.display = 'none';
+            if(loggedInView) loggedInView.style.display = 'flex';
+            if(userDisplay) userDisplay.innerText = `Piloto: ${session.user.email}`;
         } else {
-            loggedOutView.style.display = 'block';
-            loggedInView.style.display = 'none';
+            if(loggedOutView) loggedOutView.style.display = 'block';
+            if(loggedInView) loggedInView.style.display = 'none';
         }
     });
 
-    // 3. LÓGICA DE NAVEGACIÓN ENTRE PÁGINAS
-    function showPage(pageId) {
-        // Ocultar todas las páginas
-        document.querySelectorAll('.page').forEach(page => {
-            page.classList.remove('active');
-        });
-        // Mostrar la seleccionada
-        const target = document.getElementById(pageId);
-        if (target) {
-            target.classList.add('active');
-            window.scrollTo(0, 0); // Volver arriba al cambiar de pestaña
-        }
-    }
-
-    // 4. LÓGICA PARA DESPLEGAR INFO (Circuitos, Pilotos, Noticias)
-    function toggleInfo(id) {
-        const element = document.getElementById(id);
-        const allInfos = document.querySelectorAll('.circuit-info, .news-body');
-        
-        // Si ya está abierto, lo cerramos
-        if (element.style.display === 'block') {
-            element.style.display = 'none';
-        } else {
-            // Cerramos otros para que no se amontonen
-            allInfos.forEach(info => info.style.display = 'none');
-            element.style.display = 'block';
-        }
-    }
-
-    // 5. CUENTA ATRÁS PARA AUSTRALIA 2026
-    function updateTimer() {
-        const eventDate = new Date('March 15, 2026 05:00:00').getTime();
+    // 5. CONTADOR
+    const eventDate = new Date('March 15, 2026 05:00:00').getTime();
+    function updateCountdown() {
         const now = new Date().getTime();
-        const diff = eventDate - now;
+        const gap = eventDate - now;
+        if (gap < 0) return;
 
-        if (diff > 0) {
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
+        const d = Math.floor(gap / (1000 * 60 * 60 * 24));
+        const h = Math.floor((gap % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((gap % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((gap % (1000 * 60)) / 1000);
 
-            document.getElementById('days').textContent = d.toString().padStart(2, '0');
-            document.getElementById('hours').textContent = h.toString().padStart(2, '0');
-            document.getElementById('mins').textContent = m.toString().padStart(2, '0');
-            document.getElementById('segs').textContent = s.toString().padStart(2, '0');
-        }
+        if(document.getElementById('days')) document.getElementById('days').innerText = d.toString().padStart(2, '0');
+        if(document.getElementById('hours')) document.getElementById('hours').innerText = h.toString().padStart(2, '0');
+        if(document.getElementById('mins')) document.getElementById('mins').innerText = m.toString().padStart(2, '0');
+        if(document.getElementById('segs')) document.getElementById('segs').innerText = s.toString().padStart(2, '0');
     }
-
-    setInterval(updateTimer, 1000);
-    updateTimer(); // Ejecución inicial
+    setInterval(updateCountdown, 1000);
 </script>
 </body>
 </html>
