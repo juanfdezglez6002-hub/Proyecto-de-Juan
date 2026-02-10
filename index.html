@@ -524,37 +524,41 @@
             </div>
         </section>
 
-        <section id="noticias" class="page">
-            <h1>Últimas Noticias</h1>
-            <div class="news-container">
-                <div class="news-item" onclick="toggleInfo('n1')">
-                    <div class="news-header">
-                        <img src="https://images.pexels.com/photos/355325/pexels-photo-355325.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Neumáticos">
-                        <div>
-                            <small style="color:var(--accent-color)">TÉCNICA • 24 ENE</small>
-                            <h3>Nuevos compuestos de neumáticos</h3>
-                        </div>
-                    </div>
-                    <div id="n1" class="news-body">
-                        <p>Pirelli ha anunciado la nueva gama de compuestos para la temporada 2026. Debido al aumento del par motor en las nuevas unidades de potencia, las carcasas han sido reforzadas para evitar el sobrecalentamiento en curvas de alta energía.</p>
-                        <p>Se espera que los nuevos neumáticos sean un 10% más duraderos pero con una ventana de funcionamiento más estrecha.</p>
-                    </div>
-                </div>
-                
-                <div class="news-item" onclick="toggleInfo('n2')">
-                    <div class="news-header">
-                        <img src="https://images.pexels.com/photos/191538/pexels-photo-191538.jpeg?auto=compress&cs=tinysrgb&w=200" alt="Test">
-                        <div>
-                            <small style="color:var(--accent-color)">PRETEMPORADA • 22 ENE</small>
-                            <h3>Confirmadas fechas de Test</h3>
-                        </div>
-                    </div>
-                    <div id="n2" class="news-body">
-                        <p>La FIA ha confirmado que los test oficiales de pretemporada se llevarán a cabo en Baréin durante la última semana de febrero. Serán 3 días críticos donde los equipos pondrán a prueba por primera vez el chasis diseñado bajo las nuevas regulaciones aerodinámicas activas.</p>
-                    </div>
+<section id="noticias" class="page">
+    <div id="news-list-view">
+        <h1 style="margin-bottom: 2rem; border-left: 5px solid var(--accent-color); padding-left: 15px;">
+            Noticias F1 2026
+        </h1>
+        
+        <div class="news-grid">
+            <div class="news-card" onclick="openArticle('n1')">
+                <img src="https://images.pexels.com/photos/355325/pexels-photo-355325.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Pirelli">
+                <div class="news-card-content">
+                    <span class="news-tag">TÉCNICA</span>
+                    <h3>Pirelli 2026: Los neumáticos del futuro</h3>
+                    <p>Análisis de los nuevos compuestos reforzados para soportar el par motor de las unidades híbridas...</p>
+                    <small>Publicado hace 2 horas</small>
                 </div>
             </div>
-        </section>
+
+            <div class="news-card" onclick="openArticle('n2')">
+                <img src="https://images.pexels.com/photos/191538/pexels-photo-191538.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Test">
+                <div class="news-card-content">
+                    <span class="news-tag">ÚLTIMA HORA</span>
+                    <h3>Test de Baréin: Calendario oficial</h3>
+                    <p>La FIA confirma las fechas de los test invernales donde debutará Cadillac Racing...</p>
+                    <small>Publicado hace 5 horas</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="article-viewer" style="display: none;">
+        <button class="back-btn" onclick="closeArticle()">← Volver a noticias</button>
+        <div id="article-content">
+            </div>
+    </div>
+</section>
     </main>
 
     <footer>
