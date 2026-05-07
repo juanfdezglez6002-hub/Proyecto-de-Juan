@@ -992,13 +992,32 @@
     async function cargarClasificacionEquipos() {
         const tbody = document.getElementById('tabla-equipos-body');
         try {
-            const res = await fetch('https://api.openf1.org/v1/championship_teams?session_key=latest');
+            // championship_teams es beta y falla con session_key=latest
+            // Primero buscamos la session_key real de la última carrera disputada
+            const sesRes = await fetch('https://api.openf1.org/v1/sessions?session_type=Race&year=2026');
+            if (!sesRes.ok) throw new Error('Error de red');
+            const sessions = await sesRes.json();
+
+            const ahora = new Date().toISOString();
+            const pasadas = sessions
+                .filter(s => s.date_end && s.date_end < ahora)
+                .sort((a, b) => b.date_end.localeCompare(a.date_end));
+
+            if (!pasadas.length) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:#888;">
+                    La temporada aún no ha comenzado.
+                </td></tr>`;
+                return;
+            }
+
+            const latestKey = pasadas[0].session_key;
+            const res = await fetch(`https://api.openf1.org/v1/championship_teams?session_key=${latestKey}`);
             if (!res.ok) throw new Error('Error de red');
             const data = await res.json();
 
             if (!data.length) {
                 tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:#888;">
-                    La temporada aún no ha comenzado.
+                    Sin datos de equipos disponibles aún.
                 </td></tr>`;
                 return;
             }
