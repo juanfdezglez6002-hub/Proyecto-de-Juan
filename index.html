@@ -852,6 +852,39 @@
     }
 
     // ================================================================
+    // CACHÉ — localStorage para no depender de la API en cada carga
+    // Datos válidos 30 minutos; expirado = nueva llamada a la API
+    // ================================================================
+    const CACHE_TTL = 30 * 60 * 1000;
+
+    function cacheSet(key, data) {
+        try { localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data })); } catch(e) {}
+    }
+
+    function cacheGet(key) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (!raw) return null;
+            const { ts, data } = JSON.parse(raw);
+            return (Date.now() - ts > CACHE_TTL) ? null : data;
+        } catch(e) { return null; }
+    }
+
+    async function fetchConReintentos(url, intentos = 3) {
+        for (let i = 1; i <= intentos; i++) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return await res.json();
+            } catch(e) {
+                console.warn('Intento ' + i + '/3 fallido: ' + url);
+                if (i < intentos) await new Promise(r => setTimeout(r, 1500 * i));
+            }
+        }
+        return null;
+    }
+
+    // ================================================================
     // 4. OPENF1 API — PRÓXIMO EVENTO Y CONTADOR
     // ================================================================
     let eventDate = null;
@@ -928,117 +961,101 @@
     // ================================================================
     async function cargarClasificacionPilotos() {
         const tbody = document.getElementById('tabla-pilotos-body');
-        try {
-            // Obtenemos puntos por session_key=latest (última carrera)
-            const [champRes, driversRes] = await Promise.all([
-                fetch('https://api.openf1.org/v1/championship_drivers?session_key=latest'),
-                fetch('https://api.openf1.org/v1/drivers?session_key=latest')
-            ]);
 
-            if (!champRes.ok || !driversRes.ok) throw new Error('Error de red');
+        // Caché: si hay datos recientes los usamos al instante
+        const cached = cacheGet('f1_pilotos');
+        if (cached) { renderPilotos(cached.champData, cached.driversData); return; }
 
-            const champData  = await champRes.json();
-            const driversData = await driversRes.json();
+        // Sin caché: llamamos a la API con hasta 3 reintentos automáticos
+        const [champData, driversData] = await Promise.all([
+            fetchConReintentos('https://api.openf1.org/v1/championship_drivers?session_key=latest'),
+            fetchConReintentos('https://api.openf1.org/v1/drivers?session_key=latest')
+        ]);
 
-            if (!champData.length) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:#888;">
-                    La temporada aún no ha comenzado. Los datos aparecerán tras la primera carrera.
-                </td></tr>`;
-                return;
-            }
-
-            // Ordenar por posición actual
-            champData.sort((a, b) => a.position_current - b.position_current);
-
-            tbody.innerHTML = '';
-            champData.forEach((entry, i) => {
-                const piloto = driversData.find(d => d.driver_number === entry.driver_number);
-                const nombre = piloto ? piloto.full_name : `#${entry.driver_number}`;
-                const equipo = piloto ? piloto.team_name : '—';
-                const color  = piloto ? '#' + piloto.team_colour : '#666';
-                const esLider = i === 0;
-
-                tbody.innerHTML += `
-                    <tr class="${esLider ? 'leader' : ''}">
-                        <td><strong>${entry.position_current}</strong></td>
-                        <td>
-                            <span class="team-dot" style="background:${color}"></span>
-                            ${nombre}
-                        </td>
-                        <td style="color:#888; font-size:0.85rem;">${equipo}</td>
-                        <td><strong>${entry.points_current}</strong></td>
-                    </tr>`;
-            });
-
-            // Actualizar badge
-            const badge = document.getElementById('ranking-badge');
-            badge.className = 'api-badge';
-            badge.innerText = '✓ Datos en vivo · OpenF1';
-
-        } catch (e) {
-            console.warn('OpenF1 pilotos:', e.message);
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:#ff6b6b;">
-                No se pudo cargar la clasificación. Inténtalo más tarde.
-            </td></tr>`;
+        if (!champData || !driversData) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:#ff6b6b;">No se pudo cargar la clasificación. Inténtalo más tarde.</td></tr>';
             const badge = document.getElementById('ranking-badge');
             badge.className = 'api-error';
             badge.innerText = '⚠ Sin conexión a la API';
+            return;
         }
+
+        cacheSet('f1_pilotos', { champData, driversData });
+        renderPilotos(champData, driversData);
     }
+
+    function renderPilotos(champData, driversData) {
+        const tbody = document.getElementById('tabla-pilotos-body');
+        if (!champData.length) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:#888;">La temporada aún no ha comenzado.</td></tr>';
+            return;
+        }
+        champData.sort((a, b) => a.position_current - b.position_current);
+        tbody.innerHTML = '';
+        champData.forEach((entry, i) => {
+            const piloto = driversData.find(d => d.driver_number === entry.driver_number);
+            const nombre = piloto ? piloto.full_name : '#' + entry.driver_number;
+            const equipo = piloto ? piloto.team_name : '—';
+            const color  = piloto ? '#' + piloto.team_colour : '#666';
+            tbody.innerHTML += '<tr class="' + (i===0?'leader':'') + '">'
+                + '<td><strong>' + entry.position_current + '</strong></td>'
+                + '<td><span class="team-dot" style="background:' + color + '"></span>' + nombre + '</td>'
+                + '<td style="color:#888;font-size:0.85rem;">' + equipo + '</td>'
+                + '<td><strong>' + entry.points_current + '</strong></td>'
+                + '</tr>';
+        });
+        const badge = document.getElementById('ranking-badge');
+        badge.className = 'api-badge';
+        badge.innerText = '✓ Datos en vivo · OpenF1';
+        calcularClasificacionEquipos(champData, driversData);
+    }
+
 
     // ================================================================
     // 6. OPENF1 API — CLASIFICACIÓN DE EQUIPOS
     // ================================================================
-    async function cargarClasificacionEquipos() {
+    // Equipos: se calcula sumando los puntos de los pilotos (ya cargados en cargarClasificacionPilotos)
+    // Se llama pasándole los datos de pilotos y drivers que ya tenemos, sin llamada extra a la API
+    function calcularClasificacionEquipos(champData, driversData) {
         const tbody = document.getElementById('tabla-equipos-body');
         try {
-            // championship_teams es beta y falla con session_key=latest
-            // Primero buscamos la session_key real de la última carrera disputada
-            const sesRes = await fetch('https://api.openf1.org/v1/sessions?session_type=Race&year=2026');
-            if (!sesRes.ok) throw new Error('Error de red');
-            const sessions = await sesRes.json();
-
-            const ahora = new Date().toISOString();
-            const pasadas = sessions
-                .filter(s => s.date_end && s.date_end < ahora)
-                .sort((a, b) => b.date_end.localeCompare(a.date_end));
-
-            if (!pasadas.length) {
+            if (!champData || !champData.length) {
                 tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:#888;">
                     La temporada aún no ha comenzado.
                 </td></tr>`;
                 return;
             }
 
-            const latestKey = pasadas[0].session_key;
-            const res = await fetch(`https://api.openf1.org/v1/championship_teams?session_key=${latestKey}`);
-            if (!res.ok) throw new Error('Error de red');
-            const data = await res.json();
+            // Agrupamos puntos por equipo sumando los de cada piloto
+            const equipos = {};
+            champData.forEach(entry => {
+                const piloto = driversData.find(d => d.driver_number === entry.driver_number);
+                const equipo = piloto ? piloto.team_name : null;
+                if (!equipo) return;
+                if (!equipos[equipo]) equipos[equipo] = 0;
+                equipos[equipo] += entry.points_current || 0;
+            });
 
-            if (!data.length) {
-                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:#888;">
-                    Sin datos de equipos disponibles aún.
-                </td></tr>`;
-                return;
-            }
-
-            data.sort((a, b) => a.position_current - b.position_current);
+            // Convertimos a array y ordenamos de mayor a menor
+            const ranking = Object.entries(equipos)
+                .map(([nombre, puntos]) => ({ nombre, puntos }))
+                .sort((a, b) => b.puntos - a.puntos);
 
             tbody.innerHTML = '';
-            data.forEach((entry, i) => {
+            ranking.forEach((entry, i) => {
                 const esLider = i === 0;
                 tbody.innerHTML += `
                     <tr class="${esLider ? 'leader' : ''}">
-                        <td><strong>${entry.position_current}</strong></td>
-                        <td>${entry.team_name}</td>
-                        <td><strong>${entry.points_current}</strong></td>
+                        <td><strong>${i + 1}</strong></td>
+                        <td>${entry.nombre}</td>
+                        <td><strong>${entry.puntos}</strong></td>
                     </tr>`;
             });
 
         } catch (e) {
-            console.warn('OpenF1 equipos:', e.message);
+            console.warn('Equipos (cálculo):', e.message);
             tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:#ff6b6b;">
-                No se pudo cargar la clasificación.
+                No se pudo calcular la clasificación.
             </td></tr>`;
         }
     }
@@ -1047,73 +1064,69 @@
     // 7. OPENF1 API — ÚLTIMO RESULTADO (PODIO EN INICIO)
     // ================================================================
     async function cargarUltimaCarrera() {
-        const podioEl = document.getElementById('podio-container');
+        const podioEl  = document.getElementById('podio-container');
         const nombreEl = document.getElementById('ultima-carrera-nombre');
-        try {
-            // Buscamos sesiones de carrera pasadas en 2026
-            const sesRes = await fetch('https://api.openf1.org/v1/sessions?session_name=Race&year=2026');
-            if (!sesRes.ok) throw new Error('Error de red');
-            const sesiones = await sesRes.json();
 
-            const ahora = new Date();
-            const pasadas = sesiones
-                .filter(s => s.date_end && new Date(s.date_end) < ahora)
-                .sort((a, b) => new Date(b.date_end) - new Date(a.date_end));
+        // Caché
+        const cached = cacheGet('f1_podio');
+        if (cached) { renderPodio(cached.resultados, cached.pilotos, cached.gpNombre); return; }
 
-            if (pasadas.length === 0) {
-                podioEl.innerHTML = `<p style="color:#666; font-size:0.9rem; padding: 10px 0;">
-                    El podio aparecerá aquí tras la primera carrera de 2026.
-                </p>`;
-                nombreEl.innerText = '';
-                return;
-            }
+        // Paso 1: sesiones de carrera pasadas
+        const sesiones = await fetchConReintentos('https://api.openf1.org/v1/sessions?session_name=Race&year=2026');
+        if (!sesiones) { podioEl.innerHTML = '<p style="color:#666;font-size:0.9rem;">No se pudo cargar el último resultado.</p>'; return; }
 
-            const ultima = pasadas[0];
-            nombreEl.innerText = `📍 ${ultima.meeting_name || ultima.location} · ${new Date(ultima.date_end).toLocaleDateString('es-ES')}`;
+        const ahora = new Date();
+        const pasadas = sesiones.filter(s => s.date_end && new Date(s.date_end) < ahora)
+                                .sort((a,b) => new Date(b.date_end) - new Date(a.date_end));
 
-            // Obtenemos resultado (top 3) y pilotos en paralelo
-            const [resRes, drvRes] = await Promise.all([
-                fetch(`https://api.openf1.org/v1/session_result?session_key=${ultima.session_key}&position%3C=3`),
-                fetch(`https://api.openf1.org/v1/drivers?session_key=${ultima.session_key}`)
-            ]);
-
-            const todosResultados = await resRes.json();
-            const pilotos = await drvRes.json();
-
-            // Filtramos posiciones 1-3 en JS por seguridad y ordenamos
-            const resultados = todosResultados
-                .filter(r => r.position >= 1 && r.position <= 3)
-                .sort((a, b) => a.position - b.position)
-                .slice(0, 3);
-
-            const posClasses = ['p1', 'p2', 'p3'];
-            const posEmojis  = ['🥇', '🥈', '🥉'];
-
-            podioEl.innerHTML = resultados.map((r, i) => {
-                const piloto = pilotos.find(p => p.driver_number === r.driver_number);
-                const nombre = piloto ? piloto.full_name : `#${r.driver_number}`;
-                const equipo = piloto ? piloto.team_name : '';
-                const color  = piloto ? '#' + piloto.team_colour : '#666';
-                return `
-                    <div class="podium-item">
-                        <span class="podium-pos ${posClasses[i]}">${posEmojis[i]}</span>
-                        <div class="podium-info">
-                            <strong>${nombre}</strong>
-                            <small>
-                                <span class="team-dot" style="background:${color}"></span>
-                                ${equipo}
-                            </small>
-                        </div>
-                    </div>`;
-            }).join('');
-
-        } catch (e) {
-            console.warn('OpenF1 última carrera:', e.message);
-            podioEl.innerHTML = `<p style="color:#666; font-size:0.9rem; padding: 10px 0;">
-                No se pudo cargar el último resultado.
-            </p>`;
+        if (!pasadas.length) {
+            podioEl.innerHTML = '<p style="color:#666;font-size:0.9rem;padding:10px 0;">El podio aparecerá aquí tras la primera carrera de 2026.</p>';
+            nombreEl.innerText = '';
+            return;
         }
+
+        const ultima = pasadas[0];
+        const gpNombre = (ultima.meeting_name || ultima.location) + ' · ' + new Date(ultima.date_end).toLocaleDateString('es-ES');
+
+        // Paso 2: resultados y pilotos en paralelo con reintentos
+        const [todosResultados, pilotos] = await Promise.all([
+            fetchConReintentos('https://api.openf1.org/v1/session_result?session_key=' + ultima.session_key + '&position%3C=3'),
+            fetchConReintentos('https://api.openf1.org/v1/drivers?session_key=' + ultima.session_key)
+        ]);
+
+        if (!todosResultados || !pilotos) {
+            podioEl.innerHTML = '<p style="color:#666;font-size:0.9rem;">No se pudo cargar el podio.</p>';
+            return;
+        }
+
+        const resultados = todosResultados.filter(r => r.position >= 1 && r.position <= 3)
+                                           .sort((a,b) => a.position - b.position)
+                                           .slice(0,3);
+
+        cacheSet('f1_podio', { resultados, pilotos, gpNombre });
+        renderPodio(resultados, pilotos, gpNombre);
     }
+
+    function renderPodio(resultados, pilotos, gpNombre) {
+        const podioEl  = document.getElementById('podio-container');
+        const nombreEl = document.getElementById('ultima-carrera-nombre');
+        nombreEl.innerText = '📍 ' + gpNombre;
+        const posClasses = ['p1','p2','p3'];
+        const posEmojis  = ['🥇','🥈','🥉'];
+        podioEl.innerHTML = resultados.map((r,i) => {
+            const p = pilotos.find(x => x.driver_number === r.driver_number);
+            const nombre = p ? p.full_name : '#' + r.driver_number;
+            const equipo = p ? p.team_name : '';
+            const color  = p ? '#' + p.team_colour : '#666';
+            return '<div class="podium-item">'
+                 + '<span class="podium-pos ' + posClasses[i] + '">' + posEmojis[i] + '</span>'
+                 + '<div class="podium-info">'
+                 + '<strong>' + nombre + '</strong>'
+                 + '<small><span class="team-dot" style="background:' + color + '"></span>' + equipo + '</small>'
+                 + '</div></div>';
+        }).join('');
+    }
+
 
     // ================================================================
     // 8. JUEGOS — SUPABASE
@@ -1237,8 +1250,7 @@
         // Lanzamos en paralelo las tres llamadas independientes
         await Promise.allSettled([
             obtenerProximoEvento(),
-            cargarClasificacionPilotos(),
-            cargarClasificacionEquipos(),
+            cargarClasificacionPilotos(),  // llama internamente a calcularClasificacionEquipos()
             cargarUltimaCarrera()
         ]);
     });
