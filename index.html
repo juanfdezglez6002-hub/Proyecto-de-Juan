@@ -314,21 +314,16 @@
             <button onclick="showPage('equipos')">Equipos</button>
             <button onclick="showPage('ranking')">Clasificación</button>
             <button onclick="showPage('calendario')">Calendario</button>
+            <button onclick="showPage('carrera')">🔴 Carrera</button>
             <button onclick="showPage('juegos')">Juegos</button>
             <button onclick="showPage('noticias')">Noticias</button>
         </nav>
-        <div id="auth-section">
-            <div id="logged-out-view">
-                <input type="email" id="auth-email" placeholder="Email" style="padding: 5px; border-radius: 4px; border: 1px solid #444; background: #222; color: white;">
-                <input type="password" id="auth-password" placeholder="Contraseña" style="padding: 5px; border-radius: 4px; border: 1px solid #444; background: #222; color: white;">
-                <button onclick="handleSignIn()">Entrar</button>
-                <button onclick="handleSignUp()" style="background:#444">Registrarse</button>
-            </div>
-            <div id="logged-in-view" style="display:none">
-                <span id="user-display" style="margin-right: 10px; font-size: 0.8rem; color: var(--secondary-color);"></span>
-                <button onclick="handleSignOut()" style="background: #333">Cerrar Sesión</button>
-            </div>
-        </div>
+        <button id="btn-notif" onclick="toggleNotificaciones()"
+            title="Activar notificaciones de noticias"
+            style="background:transparent; border:1px solid var(--glass-border); color:white;
+                   padding:8px 14px; border-radius:6px; cursor:pointer; font-size:1rem; transition:0.3s;">
+            🔔
+        </button>
     </header>
 
     <main>
@@ -805,6 +800,64 @@
                 <div id="article-content"></div>
             </div>
         </section>
+
+        <!-- ===== CARRERA EN VIVO ===== -->
+        <section id="carrera" class="page">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+                <div>
+                    <h1 style="margin:0;" id="carrera-titulo">Seguimiento en Vivo</h1>
+                    <p style="color:#888; margin:4px 0 0 0; font-size:0.85rem;" id="carrera-subtitulo">Cargando sesión...</p>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span id="carrera-estado" style="font-size:0.75rem; padding:4px 12px; border-radius:20px; border:1px solid #444; color:#888;">⏳ Conectando...</span>
+                    <button onclick="refrescarCarrera()" style="background:transparent; border:1px solid var(--glass-border); color:white; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:0.8rem;">↻ Refrescar</button>
+                </div>
+            </div>
+
+            <!-- Meteorología -->
+            <div id="carrera-weather" style="display:none; background:var(--card-bg); border:1px solid var(--glass-border); border-radius:12px; padding:1rem 1.5rem; margin-bottom:1.5rem; display:flex; flex-wrap:wrap; gap:1.5rem; align-items:center;">
+                <span style="font-size:0.7rem; color:#888; text-transform:uppercase; letter-spacing:1px; width:100%; margin-bottom:-8px;">Meteorología</span>
+                <div><span id="w-track" style="font-size:1.3rem; font-weight:700;">—</span><br><small style="color:#888;">Asfalto</small></div>
+                <div><span id="w-air" style="font-size:1.3rem; font-weight:700;">—</span><br><small style="color:#888;">Aire</small></div>
+                <div><span id="w-humidity" style="font-size:1.3rem; font-weight:700;">—</span><br><small style="color:#888;">Humedad</small></div>
+                <div><span id="w-rain" style="font-size:1.3rem; font-weight:700;">—</span><br><small style="color:#888;">Lluvia</small></div>
+                <div><span id="w-wind" style="font-size:1.3rem; font-weight:700;">—</span><br><small style="color:#888;">Viento</small></div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr; gap:1.5rem;">
+                <!-- Tabla de posiciones -->
+                <div class="table-container">
+                    <h3 style="color:var(--accent-color); margin:0 0 1rem 0;">🏎️ Posiciones</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pos</th>
+                                <th>Piloto</th>
+                                <th>Equipo</th>
+                                <th>Intervalo</th>
+                                <th>Neumático</th>
+                                <th>Última vuelta</th>
+                            </tr>
+                        </thead>
+                        <tbody id="carrera-posiciones">
+                            <tr><td colspan="6" style="text-align:center;padding:30px;color:#555;">Esperando datos de la sesión...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mensajes de dirección de carrera -->
+                <div class="table-container">
+                    <h3 style="color:var(--accent-color); margin:0 0 1rem 0;">📻 Dirección de Carrera</h3>
+                    <div id="carrera-rc" style="max-height:280px; overflow-y:auto;">
+                        <p style="color:#555; text-align:center; padding:20px;">Sin mensajes aún.</p>
+                    </div>
+                </div>
+            </div>
+
+            <p style="font-size:0.72rem; color:#444; margin-top:1rem; text-align:center;">
+                Datos proporcionados por OpenF1 · Se actualizan automáticamente cada 15 segundos · Puede haber retraso en el plan gratuito
+            </p>
+        </section>
     </main>
 
     <footer>
@@ -824,41 +877,58 @@
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // ================================================================
-    // 2. AUTENTICACIÓN
+    // 2. NOTIFICACIONES DEL NAVEGADOR (sin login)
     // ================================================================
-    async function handleSignUp() {
-        const email = document.getElementById('auth-email').value;
-        const password = document.getElementById('auth-password').value;
-        if (!email || !password) return alert("Por favor, rellena ambos campos");
-        const { data, error } = await _supabase.auth.signUp({ email, password });
-        if (error) alert("Error: " + error.message);
-        else alert("¡Registro enviado! Revisa tu email para confirmar tu cuenta antes de entrar.");
-    }
+    // Cuántas noticias había la última vez que el usuario visitó la web
+    const NOTICIAS_TOTAL = Object.keys({n1:1, n2:1}).length; // actualiza al añadir noticias
 
-    async function handleSignIn() {
-        const email = document.getElementById('auth-email').value;
-        const password = document.getElementById('auth-password').value;
-        const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-        if (error) alert("Fallo de motor: " + error.message);
-    }
-
-    async function handleSignOut() {
-        await _supabase.auth.signOut();
-    }
-
-    _supabase.auth.onAuthStateChange((event, session) => {
-        const loggedOutView = document.getElementById('logged-out-view');
-        const loggedInView = document.getElementById('logged-in-view');
-        const userDisplay = document.getElementById('user-display');
-        if (session) {
-            loggedOutView.style.display = 'none';
-            loggedInView.style.display = 'flex';
-            userDisplay.innerText = `Piloto: ${session.user.email}`;
-        } else {
-            loggedOutView.style.display = 'block';
-            loggedInView.style.display = 'none';
+    function toggleNotificaciones() {
+        if (!('Notification' in window)) {
+            alert('Tu navegador no soporta notificaciones.');
+            return;
         }
-    });
+        if (Notification.permission === 'granted') {
+            // Ya tiene permiso — desactivar
+            localStorage.removeItem('notif_activas');
+            actualizarBtnNotif(false);
+            alert('Notificaciones desactivadas.');
+        } else {
+            Notification.requestPermission().then(perm => {
+                if (perm === 'granted') {
+                    localStorage.setItem('notif_activas', '1');
+                    localStorage.setItem('notif_vistas', NOTICIAS_TOTAL);
+                    actualizarBtnNotif(true);
+                    new Notification('Grid Data F1 🏎️', {
+                        body: '¡Notificaciones activadas! Te avisaremos cuando haya noticias nuevas.',
+                        icon: 'https://cdn-icons-png.flaticon.com/512/1454/1454404.png'
+                    });
+                }
+            });
+        }
+    }
+
+    function actualizarBtnNotif(activo) {
+        const btn = document.getElementById('btn-notif');
+        if (!btn) return;
+        btn.style.borderColor = activo ? 'var(--accent-color)' : 'var(--glass-border)';
+        btn.style.color       = activo ? 'var(--accent-color)' : 'white';
+        btn.title = activo ? 'Notificaciones activas (clic para desactivar)' : 'Activar notificaciones';
+    }
+
+    function comprobarNoticias() {
+        if (Notification.permission !== 'granted') return;
+        if (!localStorage.getItem('notif_activas')) return;
+        const vistas = parseInt(localStorage.getItem('notif_vistas') || '0');
+        if (NOTICIAS_TOTAL > vistas) {
+            const nuevas = NOTICIAS_TOTAL - vistas;
+            new Notification('Grid Data F1 — Noticias nuevas 📰', {
+                body: `Hay ${nuevas} noticia${nuevas > 1 ? 's' : ''} nueva${nuevas > 1 ? 's' : ''}. ¡Échales un vistazo!`,
+                icon: 'https://cdn-icons-png.flaticon.com/512/1454/1454404.png'
+            });
+            localStorage.setItem('notif_vistas', NOTICIAS_TOTAL);
+        }
+        actualizarBtnNotif(true);
+    }
 
     // ================================================================
     // 3. NAVEGACIÓN
@@ -867,6 +937,12 @@
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
         window.scrollTo(0, 0);
+        // Activar polling al entrar en Carrera, pararlo al salir
+        if (pageId === 'carrera') {
+            iniciarCarrera();
+        } else {
+            if (carreraInterval) { clearInterval(carreraInterval); carreraInterval = null; }
+        }
     }
 
     function toggleInfo(id) {
@@ -1301,7 +1377,186 @@
 
 
     // ================================================================
-    // 9. NOTICIAS
+    // 9. CARRERA EN VIVO — OpenF1 con refresco automático
+    // ================================================================
+    let carreraInterval = null;
+    let carreraSessionKey = null;
+
+    // Colores de neumáticos
+    const TYRE_COLORS = { SOFT:'#e8002d', MEDIUM:'#ffd700', HARD:'#f0f0f0', INTER:'#39b54a', WET:'#0067ff' };
+
+    async function iniciarCarrera() {
+        await detectarSesionActual();
+        if (carreraInterval) clearInterval(carreraInterval);
+        carreraInterval = setInterval(refrescarCarrera, 15000);
+    }
+
+    async function detectarSesionActual() {
+        try {
+            // Buscamos la sesión más reciente (activa o última terminada)
+            const data = await fetchConReintentos('https://api.openf1.org/v1/sessions?year=2026');
+            if (!data || !data.length) { mostrarEstadoCarrera('Sin sesiones en 2026'); return; }
+
+            const ahora = new Date();
+            // Sesión activa ahora mismo
+            const activa = data.find(s => new Date(s.date_start) <= ahora && new Date(s.date_end) >= ahora);
+            // Si no hay activa, la última terminada
+            const ultima = data.filter(s => new Date(s.date_end) < ahora).sort((a,b) => new Date(b.date_end)-new Date(a.date_end))[0];
+
+            const sesion = activa || ultima;
+            if (!sesion) { mostrarEstadoCarrera('Sin sesiones disponibles'); return; }
+
+            carreraSessionKey = sesion.session_key;
+            document.getElementById('carrera-titulo').innerText = sesion.meeting_name || 'Sesión F1';
+            document.getElementById('carrera-subtitulo').innerText = sesion.session_name + (activa ? ' · EN VIVO' : ' · Última sesión');
+
+            const estadoEl = document.getElementById('carrera-estado');
+            if (activa) {
+                estadoEl.style.borderColor = '#e8002d';
+                estadoEl.style.color = '#e8002d';
+                estadoEl.innerText = '🔴 EN VIVO';
+            } else {
+                estadoEl.style.borderColor = '#888';
+                estadoEl.style.color = '#888';
+                estadoEl.innerText = '⏹ Sesión finalizada';
+            }
+
+            await refrescarCarrera();
+        } catch(e) {
+            mostrarEstadoCarrera('Error al conectar con la API');
+            console.warn('Carrera detectar:', e);
+        }
+    }
+
+    async function refrescarCarrera() {
+        if (!carreraSessionKey) { await detectarSesionActual(); return; }
+        await Promise.allSettled([
+            cargarPosiciones(),
+            cargarMeteo(),
+            cargarRaceControl()
+        ]);
+    }
+
+    async function cargarPosiciones() {
+        const tbody = document.getElementById('carrera-posiciones');
+        try {
+            const [posData, drvData, stintData, lapData] = await Promise.all([
+                fetchConReintentos('https://api.openf1.org/v1/position?session_key=' + carreraSessionKey),
+                fetchConReintentos('https://api.openf1.org/v1/drivers?session_key=' + carreraSessionKey),
+                fetchConReintentos('https://api.openf1.org/v1/stints?session_key=' + carreraSessionKey),
+                fetchConReintentos('https://api.openf1.org/v1/laps?session_key=' + carreraSessionKey)
+            ]);
+
+            if (!posData || !posData.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#555;">Sin datos de posición para esta sesión.</td></tr>';
+                return;
+            }
+
+            // Última posición de cada piloto
+            const ultimaPos = {};
+            posData.forEach(p => {
+                if (!ultimaPos[p.driver_number] || p.date > ultimaPos[p.driver_number].date)
+                    ultimaPos[p.driver_number] = p;
+            });
+
+            // Último stint de cada piloto (neumático actual)
+            const ultimoStint = {};
+            if (stintData) stintData.forEach(s => {
+                if (!ultimoStint[s.driver_number] || s.stint_number > ultimoStint[s.driver_number].stint_number)
+                    ultimoStint[s.driver_number] = s;
+            });
+
+            // Última vuelta de cada piloto
+            const ultimaVuelta = {};
+            if (lapData) lapData.forEach(l => {
+                if (!ultimaVuelta[l.driver_number] || l.lap_number > ultimaVuelta[l.driver_number].lap_number)
+                    ultimaVuelta[l.driver_number] = l;
+            });
+
+            // Ordenar por posición
+            const pilotos = Object.values(ultimaPos).sort((a,b) => a.position - b.position);
+
+            tbody.innerHTML = pilotos.map((p, i) => {
+                const drv    = drvData ? drvData.find(d => d.driver_number === p.driver_number) : null;
+                const stint  = ultimoStint[p.driver_number];
+                const vuelta = ultimaVuelta[p.driver_number];
+                const color  = drv ? '#' + drv.team_colour : '#666';
+                const nombre = drv ? drv.broadcast_name : '#' + p.driver_number;
+                const equipo = drv ? drv.team_name : '—';
+                const compuesto = stint ? stint.compound : '—';
+                const tyreColor = TYRE_COLORS[compuesto] || '#888';
+
+                // Formatear tiempo de vuelta (segundos → M:SS.mmm)
+                let lapStr = '—';
+                if (vuelta && vuelta.lap_duration) {
+                    const t = vuelta.lap_duration;
+                    const m = Math.floor(t / 60);
+                    const s = (t % 60).toFixed(3).padStart(6, '0');
+                    lapStr = m + ':' + s;
+                }
+
+                return '<tr class="' + (i===0?'leader':'') + '">'
+                    + '<td><strong>' + p.position + '</strong></td>'
+                    + '<td><span class="team-dot" style="background:' + color + '"></span>' + nombre + '</td>'
+                    + '<td style="color:#888;font-size:0.82rem;">' + equipo + '</td>'
+                    + '<td style="font-family:monospace;font-size:0.85rem;color:#ccc;">—</td>'
+                    + '<td><span style="background:' + tyreColor + '; color:' + (compuesto==='HARD'?'#000':'#fff') + '; padding:2px 8px; border-radius:4px; font-size:0.75rem; font-weight:700;">' + compuesto + '</span></td>'
+                    + '<td style="font-family:monospace;font-size:0.85rem;">' + lapStr + '</td>'
+                    + '</tr>';
+            }).join('');
+
+        } catch(e) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#ff6b6b;">Error al cargar posiciones.</td></tr>';
+            console.warn('Posiciones:', e);
+        }
+    }
+
+    async function cargarMeteo() {
+        try {
+            const data = await fetchConReintentos('https://api.openf1.org/v1/weather?session_key=' + carreraSessionKey);
+            if (!data || !data.length) return;
+            const ultimo = data[data.length - 1];
+            document.getElementById('carrera-weather').style.display = 'flex';
+            document.getElementById('w-track').innerText    = ultimo.track_temperature + '°C';
+            document.getElementById('w-air').innerText      = ultimo.air_temperature + '°C';
+            document.getElementById('w-humidity').innerText = ultimo.humidity + '%';
+            document.getElementById('w-rain').innerText     = ultimo.rainfall ? '🌧 Sí' : '☀ No';
+            document.getElementById('w-wind').innerText     = ultimo.wind_speed + ' m/s';
+        } catch(e) { console.warn('Meteo:', e); }
+    }
+
+    async function cargarRaceControl() {
+        try {
+            const data = await fetchConReintentos('https://api.openf1.org/v1/race_control?session_key=' + carreraSessionKey);
+            const rcEl = document.getElementById('carrera-rc');
+            if (!data || !data.length) { rcEl.innerHTML = '<p style="color:#555;text-align:center;padding:20px;">Sin mensajes aún.</p>'; return; }
+
+            // Más recientes primero
+            const mensajes = [...data].reverse().slice(0, 30);
+            const FLAG_COLORS = { GREEN:'#39b54a', YELLOW:'#ffd700', 'DOUBLE YELLOW':'#ffd700', RED:'#e8002d', CHEQUERED:'#fff', BLUE:'#0067ff', 'BLACK AND WHITE':'#ccc' };
+
+            rcEl.innerHTML = mensajes.map(m => {
+                const flagColor = m.flag ? (FLAG_COLORS[m.flag] || '#888') : '#888';
+                const hora = m.date ? new Date(m.date).toLocaleTimeString('es-ES', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '';
+                const icono = m.category === 'SafetyCar' ? '🚗' : m.category === 'Flag' ? '🚩' : m.category === 'Drs' ? '⚡' : '📢';
+                return '<div style="padding:8px 0; border-bottom:1px solid var(--glass-border); font-size:0.85rem;">'
+                    + '<span style="color:#555; font-size:0.75rem; margin-right:8px;">' + hora + '</span>'
+                    + icono + ' '
+                    + (m.flag ? '<span style="color:' + flagColor + '; font-weight:700;">[' + m.flag + ']</span> ' : '')
+                    + '<span style="color:#ddd;">' + (m.message || m.category || '') + '</span>'
+                    + '</div>';
+            }).join('');
+        } catch(e) { console.warn('Race control:', e); }
+    }
+
+    function mostrarEstadoCarrera(msg) {
+        document.getElementById('carrera-estado').innerText = msg;
+        document.getElementById('carrera-posiciones').innerHTML =
+            '<tr><td colspan="6" style="text-align:center;padding:30px;color:#555;">' + msg + '</td></tr>';
+    }
+
+    // ================================================================
+    // 9b. NOTICIAS
     // ================================================================
     const newsDatabase = {
         'n1': {
@@ -1352,6 +1607,7 @@
     // ================================================================
     document.addEventListener('DOMContentLoaded', async () => {
         // Lanzamos en paralelo las tres llamadas independientes
+        comprobarNoticias();
         await Promise.allSettled([
             obtenerProximoEvento(),
             cargarClasificacionPilotos(),  // llama internamente a calcularClasificacionEquipos()
