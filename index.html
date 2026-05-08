@@ -1158,7 +1158,8 @@
     // ── CONFIGURACIÓN (editar cada GP) ────────────────────────────────
     const JUEGO_GP_ID     = 'mon_2026';            // ID único del GP (para filtrar en Supabase)
     const JUEGO_GP_NOMBRE = 'GP de Montreal 2026'; // Nombre visible
-    const JUEGO_POLE_REAL = '1:16.732';                    // Dejar vacío hasta que acabe la qualy. Ej: '1:12.345'
+    const JUEGO_POLE_REAL = '';                    // Dejar vacío hasta que acabe la qualy. Ej: '1:12.345'
+    const JUEGO_CERRADO   = false;                 // true = votaciones cerradas (ponlo antes de la qualy)
     // ─────────────────────────────────────────────────────────────────
 
     // Convierte '1:16.732' → segundos (76.732) para calcular diferencia
@@ -1186,10 +1187,42 @@
             document.getElementById('juego-pole-real').innerText = JUEGO_POLE_REAL;
         }
 
+        // Comprobamos si este dispositivo ya votó en este GP
+        comprobarVotoPrevio();
         cargarRankingJuego();
     });
 
+    function comprobarVotoPrevio() {
+        // Si las votaciones están cerradas, bloqueamos directamente
+        if (JUEGO_CERRADO) { cerrarFormulario(); return; }
+        // Si este dispositivo ya votó, bloqueamos también
+        const clave = 'voto_' + JUEGO_GP_ID;
+        const yaVoto = localStorage.getItem(clave);
+        if (yaVoto) bloquearFormulario(yaVoto);
+    }
+
+    function cerrarFormulario() {
+        const formBox = document.getElementById('juego-form-box');
+        formBox.innerHTML = '<div style="text-align:center; padding: 1.5rem 0;">'
+            + '<div style="font-size:2rem; margin-bottom:10px;">🔒</div>'
+            + '<p style="color:#ff6b6b; font-weight:700; font-size:1.1rem; margin:0;">Votaciones cerradas</p>'
+            + '<p style="color:#666; font-size:0.85rem; margin:8px 0 0 0;">Las predicciones para este GP ya no se aceptan.</p>'
+            + '</div>';
+    }
+
+    function bloquearFormulario(nombreGuardado) {
+        const formBox = document.getElementById('juego-form-box');
+        formBox.innerHTML = '<div style="text-align:center; padding: 1.5rem 0;">'
+            + '<div style="font-size:2rem; margin-bottom:10px;">✅</div>'
+            + '<p style="color:#00d2ff; font-weight:700; font-size:1.1rem; margin:0;">Ya has enviado tu predicción, <strong>' + nombreGuardado + '</strong></p>'
+            + '<p style="color:#666; font-size:0.85rem; margin:8px 0 0 0;">Solo se permite una predicción por dispositivo por GP.</p>'
+            + '</div>';
+    }
+
     async function enviarPrediccion() {
+        // Doble guardia: por si las votaciones se cerraron mientras la página estaba abierta
+        if (JUEGO_CERRADO) { cerrarFormulario(); return; }
+
         const nombre = document.getElementById('juego-nombre').value.trim();
         const tiempo = document.getElementById('juego-tiempo').value.trim();
         const msg    = document.getElementById('juego-msg');
@@ -1213,11 +1246,10 @@
             msg.innerText = '⚠ Error al guardar. Inténtalo de nuevo.';
             console.error(error);
         } else {
-            msg.style.color = '#00d2ff';
-            msg.innerText = '✓ ¡Predicción enviada! Suerte 🏁';
-            document.getElementById('juego-nombre').value = '';
-            document.getElementById('juego-tiempo').value = '';
+            // Marcamos este dispositivo como ya votado para este GP
+            localStorage.setItem('voto_' + JUEGO_GP_ID, nombre);
             cargarRankingJuego();
+            bloquearFormulario(nombre);
         }
     }
 
