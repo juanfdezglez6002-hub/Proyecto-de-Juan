@@ -716,37 +716,60 @@
 
         <!-- ===== JUEGOS ===== -->
         <section id="juegos" class="page">
-            <h1>🎮 Minijuegos</h1>
-            <p style="color: #888; margin-bottom: 2rem;">Adivina el tiempo de la Pole. Cierre: 30 min antes de la Qualy.</p>
+            <h1>🏁 Adivina la Pole</h1>
+            <p style="color:#888; margin-bottom:2rem;">
+                Escribe tu nombre y el tiempo que crees que marcará la pole. 
+                Cuando acabe la qualy, se publica el tiempo real y se ordena el ranking automáticamente.
+            </p>
 
-            <div id="user-stats" style="display: none; background: #111; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--accent-color);">
-                <h4 style="color: var(--accent-color); margin: 0;">Tu última precisión:</h4>
-                <p id="stat-detail" style="font-size: 1.2rem; margin: 10px 0;">Calculando...</p>
-                <div style="background: #333; height: 10px; border-radius: 5px;">
-                    <div id="stat-bar" style="background: var(--accent-color); height: 100%; width: 0%; border-radius: 5px; transition: 1s;"></div>
+            <!-- Info del GP activo + tiempo real (tú lo rellenas a mano) -->
+            <div style="background:var(--card-bg); border:1px solid var(--glass-border); border-radius:16px; padding:1.5rem; margin-bottom:1.5rem; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:1rem;">
+                <div>
+                    <div style="font-size:0.75rem; color:#888; text-transform:uppercase; letter-spacing:1px;">GP Activo</div>
+                    <div id="juego-gp-nombre" style="font-size:1.3rem; font-weight:800; margin-top:4px;">GP de Montreal 2026</div>
                 </div>
-                <small id="stat-percentile" style="color: #888;"></small>
+                <div id="juego-pole-real-box" style="display:none; background:rgba(214,0,54,0.1); border:1px solid var(--accent-color); border-radius:10px; padding:10px 20px; text-align:center;">
+                    <div style="font-size:0.7rem; color:#888; text-transform:uppercase;">Tiempo Real de la Pole</div>
+                    <div id="juego-pole-real" style="font-size:1.8rem; font-weight:800; color:var(--accent-color); font-family:monospace;"></div>
+                </div>
             </div>
 
-            <div class="news-item" id="game-container" style="border: 2px solid #333; padding: 20px;">
-                <h3 id="gp-title">GP de Australia 2026</h3>
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <input type="text" id="input-time" placeholder="Ej: 1:16.732" style="flex: 1; padding: 12px; background: #000; color: white; border: 1px solid #444;">
-                    <button onclick="enviarTiempo()" id="btn-predecir" style="background: var(--accent-color); color: white; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer;">ENVIAR</button>
+            <!-- Formulario de predicción -->
+            <div id="juego-form-box" style="background:var(--card-bg); border:1px solid var(--glass-border); border-radius:16px; padding:1.5rem; margin-bottom:1.5rem;">
+                <h3 style="margin:0 0 1rem 0; font-size:1rem; color:#ccc;">Tu predicción</h3>
+                <div style="display:grid; grid-template-columns:1fr 1fr auto; gap:10px; align-items:end;">
+                    <div>
+                        <label style="font-size:0.75rem; color:#888; display:block; margin-bottom:6px;">TU NOMBRE</label>
+                        <input id="juego-nombre" type="text" placeholder="Ej: Carlos" maxlength="20"
+                            style="width:100%; box-sizing:border-box; padding:12px; background:#000; color:white; border:1px solid #444; border-radius:8px; font-size:1rem;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.75rem; color:#888; display:block; margin-bottom:6px;">TIEMPO PREDICHO</label>
+                        <input id="juego-tiempo" type="text" placeholder="Ej: 1:16.732" maxlength="10"
+                            style="width:100%; box-sizing:border-box; padding:12px; background:#000; color:white; border:1px solid #444; border-radius:8px; font-size:1rem; font-family:monospace;">
+                    </div>
+                    <button onclick="enviarPrediccion()" id="btn-predecir"
+                        style="background:var(--accent-color); color:white; border:none; padding:12px 24px; font-weight:800; font-size:0.9rem; border-radius:8px; cursor:pointer; white-space:nowrap;">
+                        ENVIAR ›
+                    </button>
                 </div>
-                <p id="game-msg" style="margin-top: 10px; font-size: 0.8rem;"></p>
+                <p id="juego-msg" style="margin:10px 0 0 0; font-size:0.85rem; min-height:20px;"></p>
             </div>
 
-            <div class="table-container" style="margin-top: 30px;">
-                <h3 style="color: var(--accent-color);">🏆 Top 10 Tiempos más Cercanos</h3>
+            <!-- Ranking -->
+            <div class="table-container">
+                <h3 style="color:var(--accent-color); margin:0 0 1rem 0;">🏆 Ranking — Tiempos más cercanos</h3>
                 <table>
                     <thead>
-                        <tr><th>Pos</th><th>Piloto</th><th>Tiempo</th><th>Dif.</th></tr>
+                        <tr><th>Pos</th><th>Nombre</th><th>Tiempo predicho</th><th>Diferencia</th></tr>
                     </thead>
-                    <tbody id="leaderboard-body">
-                        <tr><td colspan="4" style="text-align:center;">Cargando ranking...</td></tr>
+                    <tbody id="juego-ranking-body">
+                        <tr><td colspan="4" style="text-align:center; padding:20px; color:#555;">Cargando ranking...</td></tr>
                     </tbody>
                 </table>
+                <p style="font-size:0.72rem; color:#444; margin:10px 0 0 0;">
+                    La columna "Diferencia" se activa cuando se publique el tiempo real de la pole.
+                </p>
             </div>
         </section>
 
@@ -1129,72 +1152,121 @@
 
 
     // ================================================================
-    // 8. JUEGOS — SUPABASE
+    // 8. JUEGOS — PREDICCIÓN DE POLE SIN LOGIN
     // ================================================================
-    const fechaQualy = new Date('March 14, 2026 06:00:00').getTime();
 
-    async function enviarTiempo() {
-        const { data: { session } } = await _supabase.auth.getSession();
-        if (!session) return alert("Inicia sesión para jugar.");
+    // ── CONFIGURACIÓN (editar cada GP) ────────────────────────────────
+    const JUEGO_GP_ID     = 'mon_2026';            // ID único del GP (para filtrar en Supabase)
+    const JUEGO_GP_NOMBRE = 'GP de Montreal 2026'; // Nombre visible
+    const JUEGO_POLE_REAL = '';                    // Dejar vacío hasta que acabe la qualy. Ej: '1:12.345'
+    // ─────────────────────────────────────────────────────────────────
 
-        const ahora = new Date().getTime();
-        const limite = fechaQualy - (30 * 60 * 1000);
-        if (ahora > limite) {
-            document.getElementById('btn-predecir').disabled = true;
-            return alert("El tiempo de predicción ha cerrado.");
+    // Convierte '1:16.732' → segundos (76.732) para calcular diferencia
+    function tiempoASegundos(t) {
+        t = t.trim().replace(',', '.');
+        const m = t.match(/^(\d+):(\d+\.\d+)$/);
+        if (m) return parseInt(m[1]) * 60 + parseFloat(m[2]);
+        const s = parseFloat(t);
+        return isNaN(s) ? null : s;
+    }
+
+    // Valida que el formato sea M:SS.mmm o SS.mmm
+    function validarTiempo(t) {
+        return /^\d{1,2}:\d{2}\.\d{1,3}$/.test(t.trim()) || /^\d{2,3}\.\d{1,3}$/.test(t.trim());
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Ponemos el nombre del GP activo
+        const el = document.getElementById('juego-gp-nombre');
+        if (el) el.innerText = JUEGO_GP_NOMBRE;
+
+        // Si hay tiempo real de pole, lo mostramos
+        if (JUEGO_POLE_REAL) {
+            document.getElementById('juego-pole-real-box').style.display = 'block';
+            document.getElementById('juego-pole-real').innerText = JUEGO_POLE_REAL;
         }
 
-        const tiempo = document.getElementById('input-time').value;
-        const { error } = await _supabase.from('predicciones').insert([
-            { user_id: session.user.id, email: session.user.email, predicted_time: tiempo, gp_id: 'aus_2026' }
-        ]);
+        cargarRankingJuego();
+    });
 
-        if (error) alert("Ya has participado en este GP.");
-        else {
-            alert("¡Tiempo registrado!");
-            cargarRanking();
+    async function enviarPrediccion() {
+        const nombre = document.getElementById('juego-nombre').value.trim();
+        const tiempo = document.getElementById('juego-tiempo').value.trim();
+        const msg    = document.getElementById('juego-msg');
+
+        if (!nombre) { msg.style.color = '#ff6b6b'; msg.innerText = '⚠ Escribe tu nombre antes de enviar.'; return; }
+        if (!validarTiempo(tiempo)) { msg.style.color = '#ff6b6b'; msg.innerText = '⚠ Formato incorrecto. Usa M:SS.mmm (ej: 1:16.732)'; return; }
+
+        const btn = document.getElementById('btn-predecir');
+        btn.disabled = true;
+        btn.innerText = 'Enviando...';
+
+        const { error } = await _supabase
+            .from('predicciones_simple')
+            .insert([{ nombre, tiempo_predicho: tiempo, gp_id: JUEGO_GP_ID }]);
+
+        btn.disabled = false;
+        btn.innerText = 'ENVIAR ›';
+
+        if (error) {
+            msg.style.color = '#ff6b6b';
+            msg.innerText = '⚠ Error al guardar. Inténtalo de nuevo.';
+            console.error(error);
+        } else {
+            msg.style.color = '#00d2ff';
+            msg.innerText = '✓ ¡Predicción enviada! Suerte 🏁';
+            document.getElementById('juego-nombre').value = '';
+            document.getElementById('juego-tiempo').value = '';
+            cargarRankingJuego();
         }
     }
 
-    async function cargarRanking() {
+    async function cargarRankingJuego() {
+        const tbody = document.getElementById('juego-ranking-body');
+
         const { data, error } = await _supabase
-            .from('predicciones')
-            .select('*')
-            .not('score', 'is', null)
-            .order('score', { ascending: true })
-            .limit(10);
+            .from('predicciones_simple')
+            .select('nombre, tiempo_predicho, created_at')
+            .eq('gp_id', JUEGO_GP_ID)
+            .order('created_at', { ascending: true });
 
-        if (data) {
-            document.getElementById('leaderboard-body').innerHTML = data.map((d, i) => `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td>${d.email.split('@')[0]}</td>
-                    <td>${d.predicted_time}</td>
-                    <td>+${d.score}s</td>
-                </tr>
-            `).join('');
+        if (error || !data) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#ff6b6b;">Error al cargar el ranking.</td></tr>';
+            return;
         }
-        mostrarMiProgreso();
+
+        if (!data.length) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#555;padding:20px;">Sé el primero en enviar tu predicción 🏎️</td></tr>';
+            return;
+        }
+
+        const poleSegundos = JUEGO_POLE_REAL ? tiempoASegundos(JUEGO_POLE_REAL) : null;
+
+        // Si hay pole real, calculamos diferencias y ordenamos por menor diferencia
+        let filas = data.map(d => {
+            const seg = tiempoASegundos(d.tiempo_predicho);
+            const dif = (poleSegundos !== null && seg !== null) ? Math.abs(seg - poleSegundos) : null;
+            return { ...d, dif };
+        });
+
+        if (poleSegundos !== null) {
+            filas.sort((a, b) => (a.dif ?? 9999) - (b.dif ?? 9999));
+        }
+
+        tbody.innerHTML = filas.map((f, i) => {
+            const difTexto = f.dif !== null
+                ? (f.dif === 0 ? '🎯 EXACTO' : '+' + f.dif.toFixed(3) + 's')
+                : '—';
+            const medalla = i === 0 && poleSegundos ? '🥇 ' : i === 1 && poleSegundos ? '🥈 ' : i === 2 && poleSegundos ? '🥉 ' : '';
+            return '<tr class="' + (i === 0 && poleSegundos ? 'leader' : '') + '">'
+                + '<td><strong>' + (i + 1) + '</strong></td>'
+                + '<td>' + medalla + f.nombre + '</td>'
+                + '<td style="font-family:monospace;">' + f.tiempo_predicho + '</td>'
+                + '<td style="color:' + (f.dif !== null ? (f.dif < 0.5 ? '#00d2ff' : '#ccc') : '#555') + ';">' + difTexto + '</td>'
+                + '</tr>';
+        }).join('');
     }
 
-    async function mostrarMiProgreso() {
-        const { data: { session } } = await _supabase.auth.getSession();
-        if (!session) return;
-
-        const { data: todos } = await _supabase.from('predicciones').select('score').not('score', 'is', null).order('score', { ascending: true });
-        const { data: miDato } = await _supabase.from('predicciones').select('score').eq('user_id', session.user.id).single();
-
-        if (miDato && miDato.score && todos) {
-            const total = todos.length;
-            const miPosicion = todos.findIndex(t => t.score === miDato.score) + 1;
-            const percentil = ((total - miPosicion) / total) * 100;
-
-            document.getElementById('user-stats').style.display = 'block';
-            document.getElementById('stat-detail').innerText = `Te quedaste a +${miDato.score}s`;
-            document.getElementById('stat-percentile').innerText = `Estás por delante del ${percentil.toFixed(1)}% de los jugadores`;
-            document.getElementById('stat-bar').style.width = `${percentil}%`;
-        }
-    }
 
     // ================================================================
     // 9. NOTICIAS
