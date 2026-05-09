@@ -802,60 +802,92 @@
         </section>
 
         <!-- ===== CARRERA EN VIVO ===== -->
-        <section id="carrera" class="page">
-            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
-                <div>
-                    <h1 style="margin:0;" id="carrera-titulo">Seguimiento en Vivo</h1>
-                    <p style="color:#888; margin:4px 0 0 0; font-size:0.85rem;" id="carrera-subtitulo">Cargando sesión...</p>
+        <section id="carrera" class="page" style="padding: 1rem 2%;">
+
+            <!-- Header compacto -->
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.6rem;">
+                <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;">
+                    <h2 style="margin:0; font-size:1.2rem;" id="carrera-titulo">Seguimiento en Vivo</h2>
+                    <span style="color:#888; font-size:0.8rem;" id="carrera-subtitulo">Cargando sesión...</span>
+                    <span id="carrera-estado" style="font-size:0.7rem; padding:2px 10px; border-radius:20px; border:1px solid #444; color:#888;">⏳ Conectando...</span>
                 </div>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <span id="carrera-estado" style="font-size:0.75rem; padding:4px 12px; border-radius:20px; border:1px solid #444; color:#888;">⏳ Conectando...</span>
-                    <button onclick="refrescarCarrera()" style="background:transparent; border:1px solid var(--glass-border); color:white; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:0.8rem;">↻ Refrescar</button>
-                </div>
+                <button onclick="refrescarCarrera()" style="background:transparent; border:1px solid var(--glass-border); color:#888; padding:4px 12px; border-radius:6px; cursor:pointer; font-size:0.75rem;">↻</button>
             </div>
 
-            <!-- Meteorología -->
-            <div id="carrera-weather" style="display:none; background:var(--card-bg); border:1px solid var(--glass-border); border-radius:12px; padding:1rem 1.5rem; margin-bottom:1.5rem; display:flex; flex-wrap:wrap; gap:1.5rem; align-items:center;">
-                <span style="font-size:0.7rem; color:#888; text-transform:uppercase; letter-spacing:1px; width:100%; margin-bottom:-8px;">Meteorología</span>
-                <div><span id="w-track" style="font-size:1.3rem; font-weight:700;">—</span><br><small style="color:#888;">Asfalto</small></div>
-                <div><span id="w-air" style="font-size:1.3rem; font-weight:700;">—</span><br><small style="color:#888;">Aire</small></div>
-                <div><span id="w-humidity" style="font-size:1.3rem; font-weight:700;">—</span><br><small style="color:#888;">Humedad</small></div>
-                <div><span id="w-rain" style="font-size:1.3rem; font-weight:700;">—</span><br><small style="color:#888;">Lluvia</small></div>
-                <div><span id="w-wind" style="font-size:1.3rem; font-weight:700;">—</span><br><small style="color:#888;">Viento</small></div>
-            </div>
+            <!-- Barra superior: contador + meteo en una sola línea -->
+            <div style="display:flex; flex-wrap:wrap; gap:0.6rem; margin-bottom:0.6rem; align-items:stretch;">
 
-            <div style="display:grid; grid-template-columns:1fr; gap:1.5rem;">
-                <!-- Tabla de posiciones -->
-                <div class="table-container">
-                    <h3 style="color:var(--accent-color); margin:0 0 1rem 0;">🏎️ Posiciones</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Pos</th>
-                                <th>Piloto</th>
-                                <th>Equipo</th>
-                                <th>Intervalo</th>
-                                <th>Neumático</th>
-                                <th>Última vuelta</th>
-                            </tr>
-                        </thead>
-                        <tbody id="carrera-posiciones">
-                            <tr><td colspan="6" style="text-align:center;padding:30px;color:#555;">Esperando datos de la sesión...</td></tr>
-                        </tbody>
-                    </table>
+                <!-- Contador sesión -->
+                <div id="sesion-contador-box" style="display:none; background:var(--card-bg); border:1px solid var(--glass-border); border-radius:10px; padding:0.5rem 1rem; align-items:center; gap:1.2rem; flex-wrap:wrap;">
+                    <div>
+                        <div id="sesion-contador-label" style="font-size:0.62rem; color:#888; text-transform:uppercase; letter-spacing:1px;">Tiempo restante</div>
+                        <div id="sesion-contador-valor" style="font-size:1.4rem; font-weight:800; font-family:monospace; color:var(--accent-color); line-height:1;">--:--</div>
+                    </div>
+                    <div id="sesion-vuelta-box" style="display:none;">
+                        <div style="font-size:0.62rem; color:#888; text-transform:uppercase; letter-spacing:1px;">Vuelta</div>
+                        <div id="sesion-vuelta-valor" style="font-size:1.4rem; font-weight:800; font-family:monospace; color:#00d2ff; line-height:1;">—</div>
+                    </div>
                 </div>
 
-                <!-- Mensajes de dirección de carrera -->
-                <div class="table-container">
-                    <h3 style="color:var(--accent-color); margin:0 0 1rem 0;">📻 Dirección de Carrera</h3>
-                    <div id="carrera-rc" style="max-height:280px; overflow-y:auto;">
-                        <p style="color:#555; text-align:center; padding:20px;">Sin mensajes aún.</p>
+                <!-- Meteo compacta -->
+                <div id="carrera-weather" style="display:none; background:var(--card-bg); border:1px solid var(--glass-border); border-radius:10px; padding:0.5rem 1rem; flex:1; align-items:center; gap:1.2rem; flex-wrap:wrap;">
+                    <span style="font-size:0.62rem; color:#555; text-transform:uppercase; letter-spacing:1px;">Meteo</span>
+                    <div style="display:flex; gap:1.2rem; flex-wrap:wrap; align-items:center;">
+                        <div style="text-align:center;"><span id="w-track" style="font-size:1rem; font-weight:700;">—</span><br><span style="font-size:0.6rem; color:#888;">Asfalto</span></div>
+                        <div style="text-align:center;"><span id="w-air" style="font-size:1rem; font-weight:700;">—</span><br><span style="font-size:0.6rem; color:#888;">Aire</span></div>
+                        <div style="text-align:center;"><span id="w-humidity" style="font-size:1rem; font-weight:700;">—</span><br><span style="font-size:0.6rem; color:#888;">Humedad</span></div>
+                        <div style="text-align:center;"><span id="w-rain" style="font-size:1rem; font-weight:700;">—</span><br><span style="font-size:0.6rem; color:#888;">Lluvia</span></div>
+                        <div style="text-align:center;"><span id="w-wind" style="font-size:1rem; font-weight:700;">—</span><br><span style="font-size:0.6rem; color:#888;">Viento</span></div>
                     </div>
                 </div>
             </div>
 
-            <p style="font-size:0.72rem; color:#444; margin-top:1rem; text-align:center;">
-                Datos proporcionados por OpenF1 · Se actualizan automáticamente cada 15 segundos · Puede haber retraso en el plan gratuito
+            <!-- Grid principal: tabla posiciones + columna derecha -->
+            <div style="display:grid; grid-template-columns:1fr 260px; gap:0.6rem; align-items:start;">
+
+                <!-- Tabla de posiciones compacta -->
+                <div style="background:var(--card-bg); border:1px solid var(--glass-border); border-radius:10px; padding:0.6rem 0.8rem; overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse; font-size:0.78rem;">
+                        <thead>
+                            <tr style="color:var(--accent-color); font-size:0.68rem; text-transform:uppercase; letter-spacing:0.5px;">
+                                <th style="padding:4px 6px; text-align:left; border-bottom:1px solid var(--glass-border);">P</th>
+                                <th style="padding:4px 6px; text-align:left; border-bottom:1px solid var(--glass-border);">Piloto</th>
+                                <th style="padding:4px 6px; text-align:left; border-bottom:1px solid var(--glass-border);">Equipo</th>
+                                <th style="padding:4px 6px; text-align:left; border-bottom:1px solid var(--glass-border);">Neum.</th>
+                                <th style="padding:4px 6px; text-align:left; border-bottom:1px solid var(--glass-border);">Última V.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="carrera-posiciones" style="line-height:1.1;">
+                            <tr><td colspan="5" style="text-align:center;padding:20px;color:#555;font-size:0.8rem;">Esperando datos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Columna derecha: RC + anuncio -->
+                <div style="display:flex; flex-direction:column; gap:0.6rem;">
+
+                    <!-- Dirección de carrera -->
+                    <div style="background:var(--card-bg); border:1px solid var(--glass-border); border-radius:10px; padding:0.6rem 0.8rem;">
+                        <div style="font-size:0.68rem; color:var(--accent-color); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px;">📻 Dir. Carrera</div>
+                        <div id="carrera-rc" style="max-height:320px; overflow-y:auto; font-size:0.75rem;">
+                            <p style="color:#555; text-align:center; padding:10px 0;">Sin mensajes.</p>
+                        </div>
+                    </div>
+
+                    <!-- Anuncio sutil — se integra como un bloque de datos más -->
+                    <div style="background:var(--card-bg); border:1px solid var(--glass-border); border-radius:10px; padding:0.6rem 0.8rem; position:relative;">
+                        <div style="font-size:0.6rem; color:#333; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">Patrocinador</div>
+                        <!-- Aquí va tu código de AdSense cuando lo tengas -->
+                        <div style="min-height:120px; display:flex; align-items:center; justify-content:center; color:#2a2a2a; font-size:0.7rem; font-style:italic; border:1px dashed #222; border-radius:6px;">
+                            espacio publicitario
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <p style="font-size:0.65rem; color:#333; margin-top:0.5rem; text-align:right;">
+                OpenF1 · refresco cada 15s
             </p>
         </section>
     </main>
@@ -941,7 +973,8 @@
         if (pageId === 'carrera') {
             iniciarCarrera();
         } else {
-            if (carreraInterval) { clearInterval(carreraInterval); carreraInterval = null; }
+            if (carreraInterval)  { clearInterval(carreraInterval);  carreraInterval = null; }
+            if (_contadorInterval) { clearInterval(_contadorInterval); _contadorInterval = null; }
         }
     }
 
@@ -1407,6 +1440,7 @@
             if (!sesion) { mostrarEstadoCarrera('Sin sesiones disponibles'); return; }
 
             carreraSessionKey = sesion.session_key;
+            window._sesionActual = sesion; // guardamos para el contador
             document.getElementById('carrera-titulo').innerText = sesion.meeting_name || 'Sesión F1';
             document.getElementById('carrera-subtitulo').innerText = sesion.session_name + (activa ? ' · EN VIVO' : ' · Última sesión');
 
@@ -1421,11 +1455,86 @@
                 estadoEl.innerText = '⏹ Sesión finalizada';
             }
 
+            // Arrancar contador según tipo de sesión
+            arrancarContadorSesion(sesion, !!activa);
+
             await refrescarCarrera();
         } catch(e) {
             mostrarEstadoCarrera('Error al conectar con la API');
             console.warn('Carrera detectar:', e);
         }
+    }
+
+    // Tipos de sesión que muestran TIEMPO RESTANTE
+    const TIPOS_TIEMPO = ['Practice', 'Qualifying', 'Sprint Qualifying'];
+    // Tipos de sesión que muestran VUELTAS
+    const TIPOS_VUELTAS = ['Race', 'Sprint'];
+
+    let _contadorInterval = null;
+
+    function arrancarContadorSesion(sesion, estaActiva) {
+        const box   = document.getElementById('sesion-contador-box');
+        const label = document.getElementById('sesion-contador-label');
+        const valor = document.getElementById('sesion-contador-valor');
+        const vBox  = document.getElementById('sesion-vuelta-box');
+
+        if (_contadorInterval) clearInterval(_contadorInterval);
+
+        const tipo = sesion.session_type || sesion.session_name || '';
+        const esTiempo  = TIPOS_TIEMPO.some(t => tipo.includes(t));
+        const esVueltas = TIPOS_VUELTAS.some(t => tipo === t);
+
+        if (!esTiempo && !esVueltas) { box.style.display = 'none'; return; }
+
+        box.style.display = 'flex';
+        vBox.style.display = 'none';
+
+        if (esTiempo) {
+            label.innerText = 'Tiempo restante';
+            if (!estaActiva) {
+                valor.innerText = 'Finalizada';
+                valor.style.color = '#888';
+                return;
+            }
+            // Countdown hasta date_end
+            function tickTiempo() {
+                const ahora = Date.now();
+                const fin   = new Date(sesion.date_end).getTime();
+                const diff  = fin - ahora;
+                if (diff <= 0) {
+                    valor.innerText = 'Finalizada';
+                    valor.style.color = '#888';
+                    clearInterval(_contadorInterval);
+                    return;
+                }
+                const m = Math.floor(diff / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                valor.innerText = m + ':' + String(s).padStart(2, '0');
+                valor.style.color = diff < 60000 ? '#ffd700' : 'var(--accent-color)';
+            }
+            tickTiempo();
+            _contadorInterval = setInterval(tickTiempo, 1000);
+        }
+
+        if (esVueltas) {
+            label.innerText = 'Vuelta en curso';
+            vBox.style.display = 'block';
+            valor.innerText = '—';
+            // Las vueltas se actualizan en cargarPosiciones() llamando a actualizarVueltas()
+        }
+    }
+
+    function actualizarVueltas(lapData) {
+        const sesion = window._sesionActual;
+        if (!sesion) return;
+        const tipo = sesion.session_type || sesion.session_name || '';
+        if (!TIPOS_VUELTAS.some(t => tipo === t)) return;
+        if (!lapData || !lapData.length) return;
+
+        // Vuelta más alta registrada (líder)
+        const maxVuelta = Math.max(...lapData.map(l => l.lap_number));
+        document.getElementById('sesion-contador-valor').innerText = maxVuelta;
+        document.getElementById('sesion-contador-valor').style.color = '#00d2ff';
     }
 
     async function refrescarCarrera() {
@@ -1446,6 +1555,9 @@
                 fetchConReintentos('https://api.openf1.org/v1/stints?session_key=' + carreraSessionKey),
                 fetchConReintentos('https://api.openf1.org/v1/laps?session_key=' + carreraSessionKey)
             ]);
+
+            // Actualizar contador de vueltas si es carrera/sprint
+            actualizarVueltas(lapData);
 
             if (!posData || !posData.length) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#555;">Sin datos de posición para esta sesión.</td></tr>';
@@ -1482,9 +1594,10 @@
                 const vuelta = ultimaVuelta[p.driver_number];
                 const color  = drv ? '#' + drv.team_colour : '#666';
                 const nombre = drv ? drv.broadcast_name : '#' + p.driver_number;
-                const equipo = drv ? drv.team_name : '—';
+                const equipo = drv ? (drv.team_name || '').split(' ')[0] : '—'; // solo primera palabra
                 const compuesto = stint ? stint.compound : '—';
                 const tyreColor = TYRE_COLORS[compuesto] || '#888';
+                const tyreLetra = { SOFT:'S', MEDIUM:'M', HARD:'H', INTER:'I', WET:'W' }[compuesto] || compuesto[0] || '?';
 
                 // Formatear tiempo de vuelta (segundos → M:SS.mmm)
                 let lapStr = '—';
@@ -1495,13 +1608,14 @@
                     lapStr = m + ':' + s;
                 }
 
-                return '<tr class="' + (i===0?'leader':'') + '">'
-                    + '<td><strong>' + p.position + '</strong></td>'
-                    + '<td><span class="team-dot" style="background:' + color + '"></span>' + nombre + '</td>'
-                    + '<td style="color:#888;font-size:0.82rem;">' + equipo + '</td>'
-                    + '<td style="font-family:monospace;font-size:0.85rem;color:#ccc;">—</td>'
-                    + '<td><span style="background:' + tyreColor + '; color:' + (compuesto==='HARD'?'#000':'#fff') + '; padding:2px 8px; border-radius:4px; font-size:0.75rem; font-weight:700;">' + compuesto + '</span></td>'
-                    + '<td style="font-family:monospace;font-size:0.85rem;">' + lapStr + '</td>'
+                const bgRow = i === 0 ? 'rgba(214,0,54,0.07)' : (i % 2 === 0 ? 'rgba(255,255,255,0.015)' : 'transparent');
+
+                return '<tr style="background:' + bgRow + ';">'
+                    + '<td style="padding:4px 6px; font-weight:700; font-size:0.8rem;">' + p.position + '</td>'
+                    + '<td style="padding:4px 6px;"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:' + color + ';margin-right:5px;vertical-align:middle;"></span>' + nombre + '</td>'
+                    + '<td style="padding:4px 6px; color:#666;">' + equipo + '</td>'
+                    + '<td style="padding:4px 6px;"><span style="background:' + tyreColor + '; color:' + (compuesto==='HARD'?'#000':'#fff') + '; padding:1px 6px; border-radius:3px; font-size:0.7rem; font-weight:800;">' + tyreLetra + '</span></td>'
+                    + '<td style="padding:4px 6px; font-family:monospace; font-size:0.75rem; color:#ccc;">' + lapStr + '</td>'
                     + '</tr>';
             }).join('');
 
@@ -1617,3 +1731,4 @@
     </script>
 </body>
 </html>
+
