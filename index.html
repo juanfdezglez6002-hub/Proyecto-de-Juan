@@ -316,20 +316,137 @@
         }
         .f1-row td { padding: 3px 10px; font-size: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
 
-        /* ===== JUEGOS HUB ===== */
-        .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
-        .game-card { background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; }
-        .game-card:hover { border-color: var(--accent-color); transform: translateY(-4px); }
-        .game-card .game-icon { font-size: 2.5rem; margin-bottom: 0.8rem; display: block; }
-        .game-card h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; }
+        /* ===== JUEGOS HUB — GAMING VISUAL ===== */
+
+        /* Fondo gaming de la sección completa */
+        #juegos {
+            background:
+                linear-gradient(180deg, rgba(214,0,54,0.06) 0%, transparent 40%),
+                repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(214,0,54,0.03) 80px, rgba(214,0,54,0.03) 81px),
+                repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(214,0,54,0.02) 80px, rgba(214,0,54,0.02) 81px);
+            position: relative;
+        }
+        #juegos::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+            animation: scanline 3s ease-in-out infinite;
+        }
+        @keyframes scanline {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        /* Entrada animada del hub */
+        #juegos-hub { animation: hubEntrada 0.5s ease; }
+        @keyframes hubEntrada {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Título gaming con glow */
+        #juegos h1 {
+            text-shadow: 0 0 20px rgba(214,0,54,0.4), 0 0 40px rgba(214,0,54,0.1);
+        }
+
+        /* Cards del hub */
+        .game-card {
+            background: linear-gradient(135deg, rgba(26,28,35,0.95), rgba(15,17,21,0.98));
+            border: 1px solid var(--glass-border);
+            border-radius: 16px; padding: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            position: relative; overflow: hidden;
+            animation: cardEntrada 0.4s ease both;
+        }
+        .game-card:nth-child(1) { animation-delay: 0.05s; }
+        .game-card:nth-child(2) { animation-delay: 0.15s; }
+        .game-card:nth-child(3) { animation-delay: 0.25s; }
+        @keyframes cardEntrada {
+            from { opacity: 0; transform: translateY(30px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Línea de brillo que barre la card en hover */
+        .game-card::before {
+            content: '';
+            position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+            transition: left 0.5s ease;
+            pointer-events: none;
+        }
+        .game-card:hover::before { left: 150%; }
+
+        /* Borde inferior de color al hover */
+        .game-card::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        .game-card:hover::after { transform: scaleX(1); }
+
+        .game-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 8px 32px rgba(214,0,54,0.2), 0 0 0 1px rgba(214,0,54,0.1);
+        }
+
+        /* Icono con animación */
+        .game-card .game-icon {
+            font-size: 2.5rem; margin-bottom: 0.8rem;
+            display: block;
+            text-align: center;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+            filter: drop-shadow(0 0 6px rgba(214,0,54,0.3));
+            transform-origin: center;
+        }
+        .game-card:hover .game-icon {
+            transform: scale(1.25);
+            filter: drop-shadow(0 0 16px rgba(214,0,54,0.7));
+        }
+
+        .game-card h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; transition: color 0.2s; }
+        .game-card:hover h3 { color: var(--accent-color); }
         .game-card p { color: #888; font-size: 0.82rem; margin: 0 0 1rem 0; line-height: 1.5; }
+
+        /* Botón dentro de la card */
+        .game-btn {
+            background: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 8px 18px; border-radius: 8px;
+            cursor: pointer; font-size: 0.82rem; font-weight: 700;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            position: relative; overflow: hidden;
+        }
+        .game-btn:hover {
+            background: var(--accent-color); color: white;
+            box-shadow: 0 0 16px rgba(214,0,54,0.5);
+        }
+
+        /* Back btn dentro de juego */
+        .game-back-btn {
+            background: none; border: 1px solid var(--glass-border); color: #888;
+            padding: 6px 16px; border-radius: 8px; cursor: pointer; font-size: 0.8rem;
+            margin-bottom: 1.5rem; transition: 0.2s;
+        }
+        .game-back-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
+
+        /* Entrada subpágina juego */
+        #juego-pole, #juego-driverle, #juego-semaforo {
+            animation: gameEntrada 0.35s ease;
+        }
+        @keyframes gameEntrada {
+            from { opacity: 0; transform: translateX(20px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+
+        .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 1rem; }
         .game-badge { position: absolute; top: 12px; right: 12px; font-size: 0.65rem; padding: 3px 8px; border-radius: 20px; font-weight: 700; }
         .badge-new { background: var(--accent-color); color: white; }
         .badge-daily { background: #ffd700; color: #000; }
-        .game-btn { background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 700; transition: 0.2s; }
-        .game-btn:hover { background: var(--accent-color); color: white; }
-        .game-back-btn { background: none; border: 1px solid var(--glass-border); color: #888; padding: 6px 16px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; margin-bottom: 1.5rem; transition: 0.2s; }
-        .game-back-btn:hover { border-color: var(--accent-color); color: var(--accent-color); }
 
         /* ===== DRIVERLE ===== */
         .driverle-grid { display: flex; flex-direction: column; gap: 6px; margin: 1rem 0; }
@@ -377,6 +494,26 @@
             background:#e8002d; border-color:#ff3355;
             box-shadow: 0 0 18px rgba(232,0,45,0.9), 0 0 36px rgba(232,0,45,0.4);
         }
+        /* Botón semáforo pulsante */
+        @keyframes pulsaBtn {
+            0%, 100% { box-shadow: 0 0 16px rgba(214,0,54,0.4); }
+            50%       { box-shadow: 0 0 32px rgba(214,0,54,0.8), 0 0 60px rgba(214,0,54,0.3); }
+        }
+        /* Semáforo: caja con fondo oscuro */
+        #juego-semaforo > div:has(.luz-sem) {
+            background: rgba(0,0,0,0.4);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid #1a0000;
+            display: inline-flex;
+            gap: 20px;
+        }
+        /* Input de adivinar con foco glow */
+        #dl-input:focus, #juego-nombre:focus, #juego-tiempo:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(214,0,54,0.2);
+        }
     </style>
 </head>
 <body>
@@ -392,6 +529,7 @@
             <button onclick="showPage('carrera')">🔴 Carrera</button>
             <button onclick="showPage('juegos')">Juegos</button>
             <button onclick="showPage('noticias')">Noticias</button>
+            <button onclick="showPage('ranking-usuarios')" style="border-color:#ffd700;color:#ffd700;">🏆</button>
         </nav>
         <button id="btn-notif" onclick="toggleNotificaciones()"
             title="Activar notificaciones de noticias"
@@ -793,25 +931,36 @@
                 <p style="color:#888; margin-bottom:2rem;">Pon a prueba tu conocimiento y reflejos de F1</p>
                 <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:1.5rem;">
 
-                    <div class="menu-card" onclick="abrirJuego('juego-pole')" style="text-align:left; padding:1.5rem;">
-                        <div style="font-size:2rem; margin-bottom:0.8rem;">⏱️</div>
-                        <h3 style="margin:0 0 0.5rem; color:var(--accent-color);">Adivina la Pole</h3>
-                        <p style="color:#888; font-size:0.85rem; margin:0 0 1rem;">Predice el tiempo de la vuelta rápida en clasificación. ¿Quién se acerca más?</p>
-                        <span style="font-size:0.7rem; color:#555; border:1px solid #333; padding:2px 8px; border-radius:10px;">Semanal · Supabase</span>
+                    <div class="game-card" onclick="abrirJuego('juego-pole')">
+                        <span class="game-icon">⏱️</span>
+                        <h3>Adivina la Pole</h3>
+                        <p>Predice el tiempo de la vuelta rápida en clasificación. ¿Quién llega al milisegundo?</p>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.5rem;">
+                            <span style="font-size:0.7rem;color:#555;border:1px solid #333;padding:2px 8px;border-radius:10px;">Semanal · Supabase</span>
+                            <button class="game-btn" onclick="event.stopPropagation();abrirJuego('juego-pole')">JUGAR →</button>
+                        </div>
                     </div>
 
-                    <div class="menu-card" onclick="abrirJuego('juego-driverle')" style="text-align:left; padding:1.5rem;">
-                        <div style="font-size:2rem; margin-bottom:0.8rem;">🟩</div>
-                        <h3 style="margin:0 0 0.5rem; color:var(--accent-color);">Driverle</h3>
-                        <p style="color:#888; font-size:0.85rem; margin:0 0 1rem;">Adivina el piloto del día con pistas de equipo, país, número y edad. Solo un intento diario.</p>
-                        <span style="font-size:0.7rem; color:#555; border:1px solid #333; padding:2px 8px; border-radius:10px;">Diario · 6 intentos</span>
+                    <div class="game-card" onclick="abrirJuego('juego-driverle')">
+                        <span class="game-badge badge-daily">DIARIO</span>
+                        <span class="game-icon">🟩</span>
+                        <h3>Driverle</h3>
+                        <p>Adivina el piloto del día en 6 intentos. Pistas de equipo, país, número y edad.</p>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.5rem;">
+                            <span style="font-size:0.7rem;color:#555;border:1px solid #333;padding:2px 8px;border-radius:10px;">6 intentos · Hoy</span>
+                            <button class="game-btn" onclick="event.stopPropagation();abrirJuego('juego-driverle')">JUGAR →</button>
+                        </div>
                     </div>
 
-                    <div class="menu-card" onclick="abrirJuego('juego-semaforo')" style="text-align:left; padding:1.5rem;">
-                        <div style="font-size:2rem; margin-bottom:0.8rem;">🔴</div>
-                        <h3 style="margin:0 0 0.5rem; color:var(--accent-color);">Semáforo</h3>
-                        <p style="color:#888; font-size:0.85rem; margin:0 0 1rem;">¿Tienes los reflejos de un piloto de F1? Reacciona cuando se apaguen las luces.</p>
-                        <span style="font-size:0.7rem; color:#555; border:1px solid #333; padding:2px 8px; border-radius:10px;">Sin límite · Instantáneo</span>
+                    <div class="game-card" onclick="abrirJuego('juego-semaforo')">
+                        <span class="game-badge badge-new">NEW</span>
+                        <span class="game-icon">🔴</span>
+                        <h3>Semáforo</h3>
+                        <p>¿Tienes los reflejos de un piloto de F1? Reacciona cuando se apaguen todas las luces.</p>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.5rem;">
+                            <span style="font-size:0.7rem;color:#555;border:1px solid #333;padding:2px 8px;border-radius:10px;">Sin límite · Récord local</span>
+                            <button class="game-btn" onclick="event.stopPropagation();abrirJuego('juego-semaforo')">JUGAR →</button>
+                        </div>
                     </div>
 
                 </div>
@@ -916,7 +1065,7 @@
                     <p style="color:#555;">Pulsa ARRANCAR para iniciar</p>
                 </div>
 
-                <button id="sem-btn" onclick="semArrancar()" style="background:var(--accent-color); color:white; border:none; padding:14px 48px; font-size:1.1rem; font-weight:800; border-radius:10px; cursor:pointer; letter-spacing:1px;">ARRANCAR</button>
+                <button id="sem-btn" onclick="semArrancar()" style="background:var(--accent-color); color:white; border:none; padding:14px 48px; font-size:1.1rem; font-weight:800; border-radius:10px; cursor:pointer; letter-spacing:1px; animation:pulsaBtn 2s ease-in-out infinite; box-shadow:0 0 20px rgba(214,0,54,0.5);">ARRANCAR</button>
 
                 <div style="margin-top:2.5rem; background:var(--card-bg); border:1px solid var(--glass-border); border-radius:16px; padding:1.5rem; max-width:360px; margin-left:auto; margin-right:auto; margin-bottom:0;">
                     <h3 style="color:var(--accent-color); margin:0 0 1rem; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">Tus mejores tiempos</h3>
@@ -1048,6 +1197,18 @@
             </div>
         </section>
 
+        <!-- RANKING JUGADORES -->
+        <section id="ranking-usuarios" class="page">
+            <h1 style="margin-bottom:2rem;">🏆 Ranking de Jugadores</h1>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Pos</th><th>Jugador</th><th>Puntos</th><th>Poles</th><th>Driverle</th><th>Semáforo</th></tr></thead>
+                    <tbody id="ranking-usuarios-body">
+                        <tr><td colspan="6" style="text-align:center;padding:30px;color:#555;">Cargando ranking...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
     <footer>
@@ -1691,84 +1852,115 @@
     }
 
     // ── SEMÁFORO ─────────────────────────────────────────────────────
+    // Estados: idle → encendiendo → esperando → listo → resultado
     var _semEstado = 'idle';
     var _semTimeout = null;
     var _semStart = null;
 
-    function inicSemaforo() {
-        renderSemRecords();
-    }
+    function inicSemaforo() { renderSemRecords(); }
 
     function semReset() {
         _semEstado = 'idle';
         if (_semTimeout) { clearTimeout(_semTimeout); _semTimeout = null; }
         for (var i = 1; i <= 5; i++) {
-            var l = document.getElementById('luz'+i);
+            var l = document.getElementById('luz' + i);
             if (l) l.classList.remove('on');
         }
         var btn = document.getElementById('sem-btn');
         var res = document.getElementById('sem-resultado');
-        if (btn) { btn.innerText = 'ARRANCAR'; btn.style.background = 'var(--accent-color)'; btn.disabled = false; btn.onclick = semArrancar; }
+        if (btn) {
+            btn.innerText = 'ARRANCAR';
+            btn.style.background = 'var(--accent-color)';
+            btn.style.animation = 'pulsaBtn 2s ease-in-out infinite';
+            btn.style.boxShadow = '0 0 20px rgba(214,0,54,0.5)';
+            btn.disabled = false;
+            // Asignar handler limpio
+            btn.onclick = semArrancar;
+        }
         if (res) res.innerHTML = '<p style="color:#555;">Pulsa ARRANCAR para iniciar</p>';
     }
 
     function semArrancar() {
-        if (_semEstado === 'idle') {
-            _semEstado = 'encendiendo';
-            var btn = document.getElementById('sem-btn');
-            var res = document.getElementById('sem-resultado');
-            btn.disabled = true;
-            if (res) res.innerHTML = '<p style="color:#888;">Espera a que se apaguen todas las luces...</p>';
+        if (_semEstado !== 'idle') return;
+        _semEstado = 'encendiendo';
 
-            // Encender luces una a una
-            var delay = 0;
-            for (var i = 1; i <= 5; i++) {
-                (function(idx) {
-                    delay += 600 + Math.random() * 200;
-                    setTimeout(function() {
-                        var l = document.getElementById('luz' + idx);
-                        if (l) l.classList.add('on');
-                    }, delay);
-                })(i);
-            }
+        var btn = document.getElementById('sem-btn');
+        var res = document.getElementById('sem-resultado');
 
-            // Apagar con delay aleatorio y pasar a estado 'listo'
-            var apagado = delay + 800 + Math.random() * 2500;
-            _semEstado = 'esperando';
-            btn.onclick = function() { semClickDurante(); };
-            btn.disabled = false;
-            btn.innerText = '¡REACCIONA!';
+        // Botón activo — si pulsan antes del apagado = jump start
+        btn.disabled = false;
+        btn.style.animation = 'none';
+        btn.style.boxShadow = 'none';
+        btn.onclick = function() {
+            if (_semEstado === 'encendiendo' || _semEstado === 'esperando') semJumpStart();
+        };
+        if (res) res.innerHTML = '<p style="color:#888; font-size:1rem;">Espera a que se apaguen todas las luces...</p>';
 
-            _semTimeout = setTimeout(function() {
-                for (var j = 1; j <= 5; j++) {
-                    var l = document.getElementById('luz' + j);
-                    if (l) l.classList.remove('on');
-                }
-                _semEstado = 'listo';
-                _semStart = Date.now();
-                btn.style.background = '#39b54a';
-                btn.innerText = '¡AHORA!';
-            }, apagado);
-
-        } else if (_semEstado === 'listo') {
-            var t = Date.now() - _semStart;
-            semMostrarResultado(t);
+        // Encender las 5 luces una a una con delay creciente
+        var totalDelay = 0;
+        for (var i = 1; i <= 5; i++) {
+            totalDelay += 600 + Math.random() * 200;
+            (function(idx, d) {
+                setTimeout(function() {
+                    var l = document.getElementById('luz' + idx);
+                    if (l) l.classList.add('on');
+                }, d);
+            })(i, totalDelay);
         }
+
+        // Pasar a "esperando" justo después de que se encienda la última luz
+        // El botón ya está bloqueado, así no hay jump start accidental
+        setTimeout(function() {
+            _semEstado = 'esperando';
+            // No desbloqueamos el botón aún — esperamos al apagado
+        }, totalDelay + 100);
+
+        // Apagar las luces tras un delay aleatorio y desbloquear
+        var delayApagado = totalDelay + 1000 + Math.random() * 3000;
+        _semTimeout = setTimeout(function() {
+            for (var j = 1; j <= 5; j++) {
+                var l = document.getElementById('luz' + j);
+                if (l) l.classList.remove('on');
+            }
+            _semEstado = 'listo';
+            _semStart = Date.now();
+            // Ahora sí desbloqueamos y actualizamos el botón
+            btn.disabled = false;
+            btn.style.background = '#39b54a';
+            btn.style.boxShadow = '0 0 24px rgba(57,181,74,0.7)';
+            btn.innerText = '¡AHORA!';
+            btn.onclick = semClickAhora;
+            if (res) res.innerHTML = '<p style="color:#39b54a; font-size:1.1rem; font-weight:700;">🟢 ¡PULSA AHORA!</p>';
+        }, delayApagado);
+
+        // Si alguien consigue pulsar durante la espera (antes del apagado) → jump start
+        // Lo manejamos en semClickAhora con comprobación de estado
+        btn.onclick = function() {
+            if (_semEstado === 'esperando') semJumpStart();
+        };
     }
 
-    function semClickDurante() {
-        if (_semEstado !== 'esperando') return;
+    function semClickAhora() {
+        if (_semEstado !== 'listo') return;
+        var ms = Date.now() - _semStart;
+        semMostrarResultado(ms);
+    }
+
+    function semJumpStart() {
         clearTimeout(_semTimeout);
         _semEstado = 'resultado';
-        for (var i = 1; i <= 5; i++) {
-            var l = document.getElementById('luz'+i); if(l) l.classList.remove('on');
-        }
+        for (var i = 1; i <= 5; i++) { var l = document.getElementById('luz'+i); if(l) l.classList.remove('on'); }
         var res = document.getElementById('sem-resultado');
         var btn = document.getElementById('sem-btn');
-        if (res) res.innerHTML = '<div style="font-size:2rem;margin-bottom:8px;">🚨</div>'
+        if (res) res.innerHTML = '<div style="font-size:2.5rem;margin-bottom:8px;">🚨</div>'
             + '<p style="color:#ff6b6b;font-weight:800;font-size:1.4rem;margin:0;">JUMP START</p>'
-            + '<p style="color:#888;font-size:0.9rem;margin:8px 0 0;">¡Has salido antes de tiempo! Penalización de 10 segundos.</p>';
-        if (btn) { btn.innerText = 'REINTENTAR'; btn.style.background = 'var(--accent-color)'; btn.onclick = function(){ semReset(); }; }
+            + '<p style="color:#888;font-size:0.9rem;margin:8px 0 0;">¡Has salido antes de tiempo!</p>';
+        if (btn) {
+            btn.innerText = 'REINTENTAR';
+            btn.style.background = 'var(--accent-color)';
+            btn.style.boxShadow = '0 0 20px rgba(214,0,54,0.5)';
+            btn.onclick = function() { semReset(); };
+        }
     }
 
     function semMostrarResultado(ms) {
