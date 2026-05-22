@@ -518,52 +518,22 @@
         #modal-auth { backdrop-filter: blur(6px); }
         #modal-auth input:focus { outline:none; border-color:var(--accent-color); box-shadow:0 0 0 2px rgba(214,0,54,0.15); }
         #auth-avatar { user-select:none; }
-        /* Calendario estados */
-        .gp-pasado { opacity: 0.45; }
-        .gp-proximo { border-color: var(--accent-color) !important; }
-        .gp-proximo::before { content:'PRÓXIMA'; position:absolute; top:-10px; left:12px; background:var(--accent-color); color:white; font-size:0.6rem; font-weight:800; padding:2px 8px; border-radius:20px; letter-spacing:1px; }
-        .gp-proximo { position:relative; }
-        .gp-finde { border-color:#ffd700 !important; box-shadow: 0 0 16px rgba(255,215,0,0.2); }
-        .gp-finde::before { content:'ESTE FIN DE SEMANA 🔴'; position:absolute; top:-10px; left:12px; background:#ffd700; color:#000; font-size:0.6rem; font-weight:800; padding:2px 8px; border-radius:20px; letter-spacing:1px; }
-        .gp-finde { position:relative; }
-        /* Bottom nav móvil */
-        #bottom-nav { display:none; }
-        @media (max-width: 768px) {
-            #bottom-nav { display:flex; position:fixed; bottom:0; left:0; right:0; background:rgba(12,14,20,0.98); border-top:1px solid var(--glass-border); z-index:1000; backdrop-filter:blur(15px); padding:0; }
-            #bottom-nav button { flex:1; background:none; border:none; color:#666; padding:10px 4px; font-size:0.6rem; font-weight:600; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; transition:color 0.2s; }
-            #bottom-nav button .bn-icon { font-size:1.3rem; }
-            #bottom-nav button.active { color:var(--accent-color); }
-            body { padding-bottom: 62px; }
-            header nav { display:none; }
-        }
-        /* Driverle compartir */
-        .dl-share-btn { background:transparent; border:1px solid var(--secondary-color); color:var(--secondary-color); padding:8px 18px; border-radius:8px; cursor:pointer; font-size:0.82rem; font-weight:700; transition:0.2s; margin-top:10px; }
-        .dl-share-btn:hover { background:var(--secondary-color); color:#000; }
-        /* Dot live pulsante */
-        @keyframes pulsaDot { 0%,100%{opacity:0.3;transform:scale(1)} 50%{opacity:1;transform:scale(1.3)} }
     </style>
 </head>
 <body>
 
     <header>
         <div class="logo">Grid Data F1</div>
-        <nav style="position:relative;">
-            <button onclick="showPage('inicio')" id="nav-inicio">Inicio</button>
-            <button onclick="showPage('carrera')" id="nav-carrera" style="border-color:rgba(214,0,54,0.5);color:#ff6b6b;">
-                <span id="live-dot" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#e8002d;margin-right:5px;animation:pulsaDot 1.5s ease-in-out infinite;vertical-align:middle;opacity:0;"></span>Carrera
-            </button>
-            <button onclick="showPage('juegos')" id="nav-juegos">🎮 Juegos</button>
-            <button onclick="toggleNavMore()" id="nav-more" style="letter-spacing:2px;">···</button>
-            <!-- Dropdown más -->
-            <div id="nav-more-menu" style="display:none;position:absolute;top:46px;left:50%;transform:translateX(-50%);background:rgba(12,14,20,0.98);border:1px solid var(--glass-border);border-radius:12px;padding:0.5rem;z-index:1500;backdrop-filter:blur(15px);min-width:180px;">
-                <button onclick="showPage('ranking');toggleNavMore();" style="display:block;width:100%;text-align:left;background:transparent;border:none;color:white;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">📊 Clasificación</button>
-                <button onclick="showPage('calendario');toggleNavMore();" style="display:block;width:100%;text-align:left;background:transparent;border:none;color:white;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">📅 Calendario</button>
-                <button onclick="showPage('pilotos');toggleNavMore();" style="display:block;width:100%;text-align:left;background:transparent;border:none;color:white;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">🏎️ Pilotos</button>
-                <button onclick="showPage('equipos');toggleNavMore();" style="display:block;width:100%;text-align:left;background:transparent;border:none;color:white;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">🛡️ Equipos</button>
-                <button onclick="showPage('noticias');toggleNavMore();" style="display:block;width:100%;text-align:left;background:transparent;border:none;color:white;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">📰 Noticias</button>
-                <hr style="border:none;border-top:1px solid var(--glass-border);margin:4px 0;">
-                <button onclick="showPage('ranking-usuarios');toggleNavMore();" style="display:block;width:100%;text-align:left;background:transparent;border:none;color:#ffd700;padding:9px 14px;border-radius:8px;cursor:pointer;font-size:0.82rem;font-weight:600;transition:0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">🏆 Ranking Jugadores</button>
-            </div>
+        <nav>
+            <button onclick="showPage('inicio')">Inicio</button>
+            <button onclick="showPage('pilotos')">Pilotos</button>
+            <button onclick="showPage('equipos')">Equipos</button>
+            <button onclick="showPage('ranking')">Clasificación</button>
+            <button onclick="showPage('calendario')">Calendario</button>
+            <button onclick="showPage('carrera')">🔴 Carrera</button>
+            <button onclick="showPage('juegos')">Juegos</button>
+            <button onclick="showPage('noticias')">Noticias</button>
+            <button onclick="showPage('ranking-usuarios')" style="border-color:#ffd700;color:#ffd700;">🏆</button>
         </nav>
         <div style="display:flex;align-items:center;gap:8px;position:relative;">
             <div id="auth-out" style="display:flex;gap:6px;">
@@ -622,34 +592,6 @@
                     <div><span class="time-unit" id="mins">--</span><span class="time-label">Mins</span></div>
                     <div><span class="time-unit" id="segs">--</span><span class="time-label">Segs</span></div>
                 </div>
-            </div>
-
-            <!-- Widget diario -->
-            <div id="widget-diario" style="background:var(--card-bg);border:1px solid var(--glass-border);border-radius:16px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;animation:fadeIn 0.5s ease;">
-                <div style="display:flex;align-items:center;gap:14px;">
-                    <div style="font-size:2rem;">🟩</div>
-                    <div>
-                        <div style="font-size:0.7rem;color:#888;text-transform:uppercase;letter-spacing:1px;">Juego del día</div>
-                        <div style="font-weight:800;font-size:1rem;margin:2px 0;" id="widget-titulo">Driverle · ¿Quién es el piloto de hoy?</div>
-                        <div id="widget-racha" style="font-size:0.78rem;color:#888;"></div>
-                    </div>
-                </div>
-                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                    <div id="widget-estado-dl" style="font-family:monospace;font-size:1.3rem;letter-spacing:2px;"></div>
-                    <button onclick="abrirJuego('juego-driverle');showPage('juegos');" style="background:var(--accent-color);color:white;border:none;padding:10px 22px;border-radius:8px;font-weight:800;font-size:0.85rem;cursor:pointer;white-space:nowrap;">JUGAR HOY →</button>
-                </div>
-            </div>
-
-            <!-- Barra progreso usuario (solo logueado) -->
-            <div id="widget-progreso" style="display:none;background:var(--card-bg);border:1px solid var(--glass-border);border-radius:12px;padding:0.8rem 1.2rem;margin-bottom:1.5rem;display:none;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-                    <span id="wp-ins-actual" style="font-size:0.82rem;font-weight:700;"></span>
-                    <span id="wp-ins-siguiente" style="font-size:0.75rem;color:#888;"></span>
-                </div>
-                <div style="background:#1a1a1a;border-radius:20px;height:8px;overflow:hidden;">
-                    <div id="wp-barra" style="height:100%;border-radius:20px;background:linear-gradient(90deg,var(--accent-color),#ff6b6b);transition:width 0.8s ease;width:0%;"></div>
-                </div>
-                <div id="wp-texto" style="font-size:0.72rem;color:#555;margin-top:4px;text-align:right;"></div>
             </div>
 
             <!-- Último GP -->
@@ -1425,7 +1367,6 @@
 
     function actualizarUIUsuario() {
         if (!_currentUserData) return;
-        actualizarBarraProgreso();
         const pts = _currentUserData.puntos || 0;
         const ins = getInsignia(pts);
         const nombre = _currentUserData.nombre || 'Piloto';
@@ -2171,15 +2112,11 @@
         localStorage.setItem('driverle_' + hoy, JSON.stringify(_dlEstado));
         inp.value = '';
         document.getElementById('driverle-msg').innerText = '';
-        if (found.n === _dlEstado.piloto.n) {
-            actualizarRachaDl(true);
-            if (_currentUser) {
-                var ptsDl = Math.max(50 - (_dlEstado.intentos.length - 1) * 8, 10);
-                sumarPuntos('driverle', ptsDl);
-            }
+        if (found.n === _dlEstado.piloto.n && _currentUser) {
+            var ptsDl = Math.max(50 - (_dlEstado.intentos.length - 1) * 8, 10);
+            sumarPuntos('driverle', ptsDl);
         }
         renderDriverle();
-        actualizarWidgetDiario();
     }
 
     // ── SEMÁFORO ─────────────────────────────────────────────────────
@@ -2696,25 +2633,5 @@
         ]);
     });
     </script>
-    <!-- Bottom navigation móvil -->
-    <nav id="bottom-nav">
-        <button onclick="showPage('inicio')" class="active" id="bn-inicio">
-            <span class="bn-icon">🏠</span>Inicio
-        </button>
-        <button onclick="showPage('carrera')" id="bn-carrera">
-            <span class="bn-icon">🔴</span>Carrera
-        </button>
-        <button onclick="showPage('juegos')" id="bn-juegos">
-            <span class="bn-icon">🎮</span>Juegos
-        </button>
-        <button onclick="showPage('ranking')" id="bn-ranking">
-            <span class="bn-icon">📊</span>Clasif.
-        </button>
-        <button onclick="showPage('ranking-usuarios')" id="bn-perfil">
-            <span class="bn-icon">👤</span>Perfil
-        </button>
-    </nav>
-
 </body>
 </html>
-
